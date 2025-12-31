@@ -198,7 +198,7 @@
 
         .location-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: repeat(3, 1fr);
             gap: var(--space-4);
             margin-bottom: var(--space-4);
         }
@@ -397,15 +397,6 @@
                                 <div class="loading-indicator"></div>
                                 <div class="location-error" id="talukaError"></div>
                             </div>
-
-                            <!-- Village -->
-                            <div class="location-select" id="villageSelectContainer">
-                                <select id="villageSelect" disabled required>
-                                    <option value="">Select Village</option>
-                                </select>
-                                <div class="loading-indicator"></div>
-                                <div class="location-error" id="villageError"></div>
-                            </div>
                         </div>
                         <div class="location-validation" id="locationValidation">✓ Location selected</div>
                     </div>
@@ -471,21 +462,22 @@
 
         // ====================================
         // Static Location Data (No API Calls - No CORS Issues)
+        // Single unified JSON file structure:
+        // /data/indiaLocations.json
+        // Hierarchy: India → States → Districts → Talukas
         // ====================================
-        // Loads hierarchical India location data from local JSON file
-        let locationsDatabase = null;
 
         const LocationSelector = {
             state: { select: null, error: null, container: null },
             district: { select: null, error: null, container: null },
             taluka: { select: null, error: null, container: null },
-            village: { select: null, error: null, container: null },
+
+            locationData: null, // Loaded once from indiaLocations.json
 
             selected: {
                 state: null,
                 district: null,
                 taluka: null,
-                village: null,
             },
 
             async init() {
@@ -501,119 +493,138 @@
                 this.taluka.error = document.getElementById('talukaError');
                 this.taluka.container = document.getElementById('talukaSelectContainer');
 
-                this.village.select = document.getElementById('villageSelect');
-                this.village.error = document.getElementById('villageError');
-                this.village.container = document.getElementById('villageSelectContainer');
-
-                // Load locations JSON
-                await this.loadLocationsDatabase();
-
-                if (locationsDatabase) {
-                    this.populateStates();
-                }
+                // Load indiaLocations.json once
+                await this.loadLocationData();
 
                 // Event listeners
                 this.state.select.addEventListener('change', () => this.onStateChange());
                 this.district.select.addEventListener('change', () => this.onDistrictChange());
                 this.taluka.select.addEventListener('change', () => this.onTalukaChange());
-                this.village.select.addEventListener('change', () => this.onVillageChange());
             },
 
-            async loadLocationsDatabase() {
+            async loadLocationData() {
                 try {
-                    console.log('📍 Loading locations database from: /data/indiaLocations.json');
+                    console.log('📍 Loading location data from: /data/indiaLocations.json');
                     this.showLoading('state');
 
                     const response = await fetch('../data/indiaLocations.json');
                     if (!response.ok) {
-                        throw new Error(`Failed to load JSON: ${response.status}`);
+                        throw new Error(`Failed to load indiaLocations.json: ${response.status}`);
                     }
 
-                    locationsDatabase = await response.json();
-                    console.log('✅ Locations database loaded successfully');
+                    this.locationData = await response.json();
+                    if (!this.locationData || !this.locationData.India) {
+                        throw new Error('Invalid location data format');
+                    }
+
+                    await this.populateStates();
                     this.hideLoading('state');
+                    console.log('✅ Location data loaded successfully');
                 } catch (error) {
-                    console.error('❌ Failed to load locations database:', error);
+                    console.error('❌ Failed to load location data:', error);
                     this.showError('state', 'Failed to load location data. Please refresh the page.');
                     this.hideLoading('state');
                 }
             },
 
-            populateStates() {
-                if (!locationsDatabase || !locationsDatabase.India) {
-                    console.error('❌ Invalid locations database structure');
-                    return;
+            async populateStates() {
+                try {
+                    if (!this.locationData || !this.locationData.India) {
+                        throw new Error('Location data not loaded');
+                    }
+
+                    const states = Object.keys(this.locationData.India);
+                    if (!Array.isArray(states) || states.length === 0) {
+                        throw new Error('Invalid states data');
+                    }
+
+                    const select = this.state.select;
+                    const option = select.options[0];
+                    select.innerHTML = '';
+                    select.appendChild(option);
+
+                    states.forEach(stateName => {
+                        const optElement = document.createElement('option');
+                        optElement.value = stateName;
+                        optElement.textContent = stateName;
+                        select.appendChild(optElement);
+                    });
+
+                    console.log(`✅ ${states.length} states loaded`);
+                } catch (error) {
+                    console.error('❌ Failed to populate states:', error);
+                    this.showError('state', 'Failed to load states.');
                 }
-
-                const states = Object.keys(locationsDatabase.India).sort();
-                const select = this.state.select;
-                const option = select.options[0];
-                select.innerHTML = '';
-                select.appendChild(option);
-
-                states.forEach(stateName => {
-                    const optElement = document.createElement('option');
-                    optElement.value = stateName;
-                    optElement.textContent = stateName;
-                    select.appendChild(optElement);
-                });
-
-                console.log(`✅ ${states.length} states loaded`);
             },
 
             populateDistricts(stateName) {
-                const districts = Object.keys(locationsDatabase.India[stateName] || {}).sort();
-                const select = this.district.select;
-                const option = select.options[0];
-                select.innerHTML = '';
-                select.appendChild(option);
+                try {
+                    if (!this.locationData || !this.locationData.India[stateName]) {
+                        throw new Error(`State ${stateName} not found`);
+                    }
 
-                districts.forEach(districtName => {
-                    const optElement = document.createElement('option');
-                    optElement.value = districtName;
-                    optElement.textContent = districtName;
-                    select.appendChild(optElement);
-                });
+                    console.log(`📍 Loading districts for: ${stateName}`);
+                    this.showLoading('district');
 
-                console.log(`✅ ${districts.length} districts loaded for ${stateName}`);
+                    const districts = Object.keys(this.locationData.India[stateName]);
+                    if (!Array.isArray(districts) || districts.length === 0) {
+                        throw new Error(`No districts found for ${stateName}`);
+                    }
+
+                    const select = this.district.select;
+                    const option = select.options[0];
+                    select.innerHTML = '';
+                    select.appendChild(option);
+
+                    districts.forEach(districtName => {
+                        const optElement = document.createElement('option');
+                        optElement.value = districtName;
+                        optElement.textContent = districtName;
+                        select.appendChild(optElement);
+                    });
+
+                    this.hideLoading('district');
+                    console.log(`✅ ${districts.length} districts loaded for ${stateName}`);
+                } catch (error) {
+                    console.error('❌ Failed to load districts:', error);
+                    this.showError('district', 'Failed to load districts.');
+                    this.hideLoading('district');
+                }
             },
 
             populateTalukas(stateName, districtName) {
-                const talukas = Object.keys(
-                    locationsDatabase.India[stateName]?.[districtName] || {}
-                ).sort();
+                try {
+                    if (!this.locationData || !this.locationData.India[stateName] || !this.locationData.India[stateName][districtName]) {
+                        throw new Error(`District ${districtName} not found in ${stateName}`);
+                    }
 
-                const select = this.taluka.select;
-                const option = select.options[0];
-                select.innerHTML = '';
-                select.appendChild(option);
+                    console.log(`📍 Loading talukas for: ${districtName}`);
+                    this.showLoading('taluka');
 
-                talukas.forEach(talukaName => {
-                    const optElement = document.createElement('option');
-                    optElement.value = talukaName;
-                    optElement.textContent = talukaName;
-                    select.appendChild(optElement);
-                });
+                    const talukas = Object.keys(this.locationData.India[stateName][districtName]);
+                    if (!Array.isArray(talukas) || talukas.length === 0) {
+                        throw new Error(`No talukas found for ${districtName}`);
+                    }
 
-                console.log(`✅ ${talukas.length} talukas loaded for ${districtName}`);
-            },
+                    const select = this.taluka.select;
+                    const option = select.options[0];
+                    select.innerHTML = '';
+                    select.appendChild(option);
 
-            populateVillages(stateName, districtName, talukaName) {
-                const villages = locationsDatabase.India[stateName]?.[districtName]?.[talukaName] || [];
+                    talukas.forEach(talukaName => {
+                        const optElement = document.createElement('option');
+                        optElement.value = talukaName;
+                        optElement.textContent = talukaName;
+                        select.appendChild(optElement);
+                    });
 
-                const select = this.village.select;
-                const option = select.options[0];
-                select.innerHTML = '';
-                select.appendChild(option);
-
-                villages.forEach(village => {
-                    const optElement = document.createElement('option');
-                    optElement.value = JSON.stringify(village);
-                    optElement.textContent = village.name;
-                    select.appendChild(optElement);
-                });
-
-                console.log(`✅ ${villages.length} villages loaded for ${talukaName}`);
+                    this.hideLoading('taluka');
+                    console.log(`✅ ${talukas.length} talukas loaded for ${districtName}`);
+                } catch (error) {
+                    console.error('❌ Failed to load talukas:', error);
+                    this.showError('taluka', 'Failed to load talukas.');
+                    this.hideLoading('taluka');
+                }
             },
 
             showLoading(level) {
@@ -645,15 +656,13 @@
                 // Reset dependent fields
                 this.selected.district = null;
                 this.selected.taluka = null;
-                this.selected.village = null;
 
                 this.district.select.innerHTML = '<option value="">Select District</option>';
                 this.taluka.select.innerHTML = '<option value="">Select Taluka</option>';
-                this.village.select.innerHTML = '<option value="">Select Village</option>';
                 this.district.select.disabled = false;
                 this.taluka.select.disabled = true;
-                this.village.select.disabled = true;
 
+                // Load districts for selected state
                 this.populateDistricts(selectedStateName);
                 this.updateValidation();
             },
@@ -661,20 +670,19 @@
             onDistrictChange() {
                 if (!this.district.select.value) return;
 
+                const selectedStateName = this.selected.state;
                 const selectedDistrictName = this.district.select.value;
                 this.selected.district = selectedDistrictName;
                 console.log('📍 District selected:', selectedDistrictName);
 
-                // Reset dependent fields
+                // Reset dependent field
                 this.selected.taluka = null;
-                this.selected.village = null;
 
                 this.taluka.select.innerHTML = '<option value="">Select Taluka</option>';
-                this.village.select.innerHTML = '<option value="">Select Village</option>';
                 this.taluka.select.disabled = false;
-                this.village.select.disabled = true;
 
-                this.populateTalukas(this.selected.state, selectedDistrictName);
+                // Load talukas for selected district
+                this.populateTalukas(selectedStateName, selectedDistrictName);
                 this.updateValidation();
             },
 
@@ -684,23 +692,6 @@
                 const selectedTalukaName = this.taluka.select.value;
                 this.selected.taluka = selectedTalukaName;
                 console.log('📍 Taluka selected:', selectedTalukaName);
-
-                // Reset dependent field
-                this.selected.village = null;
-                this.village.select.innerHTML = '<option value="">Select Village</option>';
-                this.village.select.disabled = false;
-
-                this.populateVillages(this.selected.state, this.selected.district, selectedTalukaName);
-                this.updateValidation();
-            },
-
-            onVillageChange() {
-                if (!this.village.select.value) return;
-
-                const selectedVillageJSON = this.village.select.value;
-                const selectedVillage = JSON.parse(selectedVillageJSON);
-                this.selected.village = selectedVillage;
-                console.log('📍 Village selected:', selectedVillage);
 
                 this.updateValidation();
             },
@@ -715,7 +706,7 @@
             },
 
             isComplete() {
-                return !!(this.selected.state && this.selected.district && this.selected.taluka && this.selected.village);
+                return !!(this.selected.state && this.selected.district && this.selected.taluka);
             },
 
             getSelected() {
@@ -812,7 +803,7 @@
 
             const result = await authService.signUp(email, password, {
                 fullName: fullName,
-                location: `${locationData.village.name}, ${locationData.taluka}`
+                location: `${locationData.taluka}, ${locationData.district}, ${locationData.state}`
             });
 
             if (result.success) {
@@ -824,13 +815,12 @@
                     const userId = result.user.uid;
                     const now = new Date().toISOString();
 
-                    // Build structured location with proper name/code format
+                    // Build structured location - State, District, Taluka only
                     const structuredLocation = {
                         country: "India",
                         state: { name: locationData.state },
                         district: { name: locationData.district },
                         taluka: { name: locationData.taluka },
-                        village: locationData.village, // already has {name, code}
                         updatedAt: now
                     };
 
