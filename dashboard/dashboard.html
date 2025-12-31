@@ -17,14 +17,43 @@
 
 <body>
     <div class="dashboard-wrapper">
-        <!-- Header -->
+        <!-- FIXED Header (doesn't scroll) -->
         <div class="dashboard-header">
             <div id="headerComponent"></div>
         </div>
 
-        <!-- Main Content Area -->
+        <!-- Main Content Area (scrollable) -->
         <div class="dashboard-content">
             <div class="dashboard-body">
+                <!-- Weather Card as part of scrollable content -->
+                <div class="weather-card-wrapper">
+                    <div class="weather-card">
+                        <div class="weather-icon" id="weatherIcon">☀️</div>
+                        <div class="weather-info">
+                            <div class="weather-temp" id="weatherTemp">25°C</div>
+                            <div class="weather-desc" id="weatherDesc">Clear</div>
+                            <div class="weather-location" id="weatherLocation">Loading...</div>
+                        </div>
+                        <div class="weather-details">
+                            <div class="weather-detail-item">
+                                <span class="detail-label">Humidity</span>
+                                <span class="detail-value" id="weatherHumidity">--</span>
+                            </div>
+                            <div class="weather-detail-item">
+                                <span class="detail-label">Wind Speed</span>
+                                <span class="detail-value" id="weatherWind">-- km/h</span>
+                            </div>
+                            <div class="weather-detail-item">
+                                <span class="detail-label">📍 Farm Location</span>
+                                <span class="detail-value" id="farmLocation">Loading...</span>
+                            </div>
+                            <div class="weather-detail-item">
+                                <span class="detail-label">📅 Last Visit</span>
+                                <span class="detail-value" id="lastVisit">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <!-- Status Indicators -->
                 <div id="statusComponent"></div>
 

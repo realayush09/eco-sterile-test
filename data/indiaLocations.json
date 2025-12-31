@@ -1,0 +1,329 @@
+{
+  "India": {
+    "Andaman and Nicobar Islands": {
+      "North And Middle Andaman": {
+        "Mayabunder": [
+          { "name": "Mayabunder", "code": "530001" }
+        ]
+      }
+    },
+    "Andhra Pradesh": {
+      "Anantapur": {
+        "Anantapur": [
+          { "name": "Anantapur", "code": "280001" },
+          { "name": "Kalyandurg", "code": "280002" }
+        ]
+      },
+      "Chittoor": {
+        "Chittoor": [
+          { "name": "Chittoor", "code": "280101" }
+        ]
+      }
+    },
+    "Arunachal Pradesh": {
+      "Papum Pare": {
+        "Itanagar": [
+          { "name": "Itanagar", "code": "710001" }
+        ]
+      }
+    },
+    "Assam": {
+      "Karimganj": {
+        "Karimganj": [
+          { "name": "Lafasail Pt III", "code": "299968" },
+          { "name": "Lafasail Pt II", "code": "299967" },
+          { "name": "Karimganj", "code": "299900" }
+        ]
+      },
+      "Sylhet": {
+        "Sylhet": [
+          { "name": "Sylhet", "code": "300001" }
+        ]
+      },
+      "Barpeta": {
+        "Barpeta": [
+          { "name": "Barpeta", "code": "300100" }
+        ]
+      }
+    },
+    "Bihar": {
+      "Patna": {
+        "Patna": [
+          { "name": "Patna", "code": "310001" },
+          { "name": "Sampatchak", "code": "310002" }
+        ]
+      },
+      "Gaya": {
+        "Gaya": [
+          { "name": "Gaya", "code": "320001" }
+        ]
+      }
+    },
+    "Chhattisgarh": {
+      "Raipur": {
+        "Raipur": [
+          { "name": "Raipur", "code": "340001" }
+        ]
+      }
+    },
+    "Goa": {
+      "North Goa": {
+        "Pernem": [
+          { "name": "Pernem", "code": "440001" }
+        ]
+      },
+      "South Goa": {
+        "Quepem": [
+          { "name": "Quepem", "code": "440101" }
+        ]
+      }
+    },
+    "Gujarat": {
+      "Ahmedabad": {
+        "Ahmedabad": [
+          { "name": "Ahmedabad", "code": "450001" },
+          { "name": "Bavla", "code": "450002" }
+        ]
+      },
+      "Vadodara": {
+        "Vadodara": [
+          { "name": "Vadodara", "code": "460001" }
+        ]
+      }
+    },
+    "Haryana": {
+      "Faridabad": {
+        "Faridabad": [
+          { "name": "Faridabad", "code": "490001" }
+        ]
+      },
+      "Gurgaon": {
+        "Gurgaon": [
+          { "name": "Gurgaon", "code": "500001" }
+        ]
+      }
+    },
+    "Himachal Pradesh": {
+      "Shimla": {
+        "Shimla": [
+          { "name": "Shimla", "code": "510001" }
+        ]
+      }
+    },
+    "Jharkhand": {
+      "Ranchi": {
+        "Ranchi": [
+          { "name": "Ranchi", "code": "530001" }
+        ]
+      }
+    },
+    "Karnataka": {
+      "Bangalore": {
+        "Bangalore": [
+          { "name": "Bangalore", "code": "560001" },
+          { "name": "Whitefield", "code": "560066" }
+        ]
+      },
+      "Mysore": {
+        "Mysore": [
+          { "name": "Mysore", "code": "570001" }
+        ]
+      }
+    },
+    "Kerala": {
+      "Thiruvananthapuram": {
+        "Thiruvananthapuram": [
+          { "name": "Thiruvananthapuram", "code": "590001" }
+        ]
+      },
+      "Kochi": {
+        "Kochi": [
+          { "name": "Kochi", "code": "600001" }
+        ]
+      }
+    },
+    "Madhya Pradesh": {
+      "Indore": {
+        "Indore": [
+          { "name": "Indore", "code": "610001" }
+        ]
+      },
+      "Bhopal": {
+        "Bhopal": [
+          { "name": "Bhopal", "code": "620001" }
+        ]
+      }
+    },
+    "Maharashtra": {
+      "Mumbai": {
+        "Mumbai": [
+          { "name": "Mumbai", "code": "630001" },
+          { "name": "Andheri", "code": "630002" }
+        ]
+      },
+      "Pune": {
+        "Pune": [
+          { "name": "Pune", "code": "640001" }
+        ]
+      }
+    },
+    "Manipur": {
+      "Imphal": {
+        "Imphal": [
+          { "name": "Imphal", "code": "650001" }
+        ]
+      }
+    },
+    "Meghalaya": {
+      "Shillong": {
+        "Shillong": [
+          { "name": "Shillong", "code": "660001" }
+        ]
+      }
+    },
+    "Mizoram": {
+      "Aizawl": {
+        "Aizawl": [
+          { "name": "Aizawl", "code": "670001" }
+        ]
+      }
+    },
+    "Nagaland": {
+      "Kohima": {
+        "Kohima": [
+          { "name": "Kohima", "code": "680001" }
+        ]
+      }
+    },
+    "Odisha": {
+      "Bhubaneswar": {
+        "Bhubaneswar": [
+          { "name": "Bhubaneswar", "code": "690001" }
+        ]
+      }
+    },
+    "Punjab": {
+      "Amritsar": {
+        "Amritsar": [
+          { "name": "Amritsar", "code": "700001" }
+        ]
+      },
+      "Ludhiana": {
+        "Ludhiana": [
+          { "name": "Ludhiana", "code": "710001" }
+        ]
+      }
+    },
+    "Rajasthan": {
+      "Jaipur": {
+        "Jaipur": [
+          { "name": "Jaipur", "code": "720001" }
+        ]
+      },
+      "Jodhpur": {
+        "Jodhpur": [
+          { "name": "Jodhpur", "code": "730001" }
+        ]
+      }
+    },
+    "Sikkim": {
+      "East Sikkim": {
+        "Gangtok": [
+          { "name": "Gangtok", "code": "740001" }
+        ]
+      }
+    },
+    "Tamil Nadu": {
+      "Chennai": {
+        "Chennai": [
+          { "name": "Chennai", "code": "750001" }
+        ]
+      },
+      "Coimbatore": {
+        "Coimbatore": [
+          { "name": "Coimbatore", "code": "760001" }
+        ]
+      }
+    },
+    "Telangana": {
+      "Hyderabad": {
+        "Hyderabad": [
+          { "name": "Hyderabad", "code": "770001" }
+        ]
+      }
+    },
+    "Tripura": {
+      "Agartala": {
+        "Agartala": [
+          { "name": "Agartala", "code": "780001" }
+        ]
+      }
+    },
+    "Uttar Pradesh": {
+      "Lucknow": {
+        "Lucknow": [
+          { "name": "Lucknow", "code": "790001" }
+        ]
+      },
+      "Varanasi": {
+        "Varanasi": [
+          { "name": "Varanasi", "code": "800001" }
+        ]
+      }
+    },
+    "Uttarakhand": {
+      "Dehradun": {
+        "Dehradun": [
+          { "name": "Dehradun", "code": "810001" }
+        ]
+      }
+    },
+    "West Bengal": {
+      "Kolkata": {
+        "Kolkata": [
+          { "name": "Kolkata", "code": "820001" }
+        ]
+      },
+      "Darjeeling": {
+        "Darjeeling": [
+          { "name": "Darjeeling", "code": "830001" }
+        ]
+      }
+    },
+    "Dadra and Nagar Haveli": {
+      "Silvassa": {
+        "Silvassa": [
+          { "name": "Silvassa", "code": "840001" }
+        ]
+      }
+    },
+    "Daman and Diu": {
+      "Daman": {
+        "Daman": [
+          { "name": "Daman", "code": "850001" }
+        ]
+      }
+    },
+    "Lakshadweep": {
+      "Lakshadweep": {
+        "Minicoy": [
+          { "name": "Minicoy", "code": "860001" }
+        ]
+      }
+    },
+    "Puducherry": {
+      "Puducherry": {
+        "Puducherry": [
+          { "name": "Puducherry", "code": "870001" }
+        ]
+      }
+    },
+    "Delhi": {
+      "New Delhi": {
+        "New Delhi": [
+          { "name": "New Delhi", "code": "880001" }
+        ]
+      }
+    }
+  }
+}

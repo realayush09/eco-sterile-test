@@ -196,6 +196,87 @@
             background-color: var(--success-color);
         }
 
+        .location-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-4);
+            margin-bottom: var(--space-4);
+        }
+
+        .location-select {
+            position: relative;
+        }
+
+        .location-select select {
+            width: 100%;
+            padding: var(--space-3) var(--space-4);
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--gray-600);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all var(--transition-base);
+        }
+
+        .location-select select:hover:not(:disabled) {
+            border-color: var(--primary-color);
+            background-color: var(--bg-tertiary);
+        }
+
+        .location-select select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(45, 212, 191, 0.1);
+        }
+
+        .location-select select:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background-color: var(--bg-tertiary);
+        }
+
+        .location-select .loading-indicator {
+            position: absolute;
+            right: var(--space-3);
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(45, 212, 191, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary-color);
+            animation: spin 1s linear infinite;
+            pointer-events: none;
+            display: none;
+        }
+
+        .location-select.loading .loading-indicator {
+            display: block;
+        }
+
+        .location-error {
+            color: var(--danger-color);
+            font-size: 0.75rem;
+            margin-top: var(--space-2);
+            display: none;
+        }
+
+        .location-error.show {
+            display: block;
+        }
+
+        .location-validation {
+            color: var(--success-color);
+            font-size: 0.75rem;
+            margin-top: var(--space-2);
+            display: none;
+        }
+
+        .location-validation.show {
+            display: block;
+        }
+
         .checkbox-group {
             display: flex;
             align-items: flex-start;
@@ -286,6 +367,49 @@
                         <input type="email" id="email" placeholder="you@example.com" required>
                     </div>
 
+                    <!-- Location - Multi-level Dropdown -->
+                    <div style="grid-column: 1 / -1;">
+                        <label class="form-label">📍 Farm Location (India)</label>
+                        <div class="location-grid">
+                            <!-- State -->
+                            <div class="location-select" id="stateSelectContainer">
+                                <select id="stateSelect" required>
+                                    <option value="">Select State</option>
+                                </select>
+                                <div class="loading-indicator"></div>
+                                <div class="location-error" id="stateError"></div>
+                            </div>
+
+                            <!-- District -->
+                            <div class="location-select" id="districtSelectContainer">
+                                <select id="districtSelect" disabled required>
+                                    <option value="">Select District</option>
+                                </select>
+                                <div class="loading-indicator"></div>
+                                <div class="location-error" id="districtError"></div>
+                            </div>
+
+                            <!-- Taluka -->
+                            <div class="location-select" id="talukaSelectContainer">
+                                <select id="talukaSelect" disabled required>
+                                    <option value="">Select Taluka</option>
+                                </select>
+                                <div class="loading-indicator"></div>
+                                <div class="location-error" id="talukaError"></div>
+                            </div>
+
+                            <!-- Village -->
+                            <div class="location-select" id="villageSelectContainer">
+                                <select id="villageSelect" disabled required>
+                                    <option value="">Select Village</option>
+                                </select>
+                                <div class="loading-indicator"></div>
+                                <div class="location-error" id="villageError"></div>
+                            </div>
+                        </div>
+                        <div class="location-validation" id="locationValidation">✓ Location selected</div>
+                    </div>
+
                     <!-- Password -->
                     <div class="form-group">
                         <label class="form-label">Password</label>
@@ -339,7 +463,269 @@
 
     <script type="module">
         import { authService } from '../services/firebase.js';
+        import { db } from '../services/firebase.js';
+        import {
+            ref,
+            set,
+        } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
 
+        // ====================================
+        // Static Location Data (No API Calls - No CORS Issues)
+        // ====================================
+        // Loads hierarchical India location data from local JSON file
+        let locationsDatabase = null;
+
+        const LocationSelector = {
+            state: { select: null, error: null, container: null },
+            district: { select: null, error: null, container: null },
+            taluka: { select: null, error: null, container: null },
+            village: { select: null, error: null, container: null },
+
+            selected: {
+                state: null,
+                district: null,
+                taluka: null,
+                village: null,
+            },
+
+            async init() {
+                this.state.select = document.getElementById('stateSelect');
+                this.state.error = document.getElementById('stateError');
+                this.state.container = document.getElementById('stateSelectContainer');
+
+                this.district.select = document.getElementById('districtSelect');
+                this.district.error = document.getElementById('districtError');
+                this.district.container = document.getElementById('districtSelectContainer');
+
+                this.taluka.select = document.getElementById('talukaSelect');
+                this.taluka.error = document.getElementById('talukaError');
+                this.taluka.container = document.getElementById('talukaSelectContainer');
+
+                this.village.select = document.getElementById('villageSelect');
+                this.village.error = document.getElementById('villageError');
+                this.village.container = document.getElementById('villageSelectContainer');
+
+                // Load locations JSON
+                await this.loadLocationsDatabase();
+
+                if (locationsDatabase) {
+                    this.populateStates();
+                }
+
+                // Event listeners
+                this.state.select.addEventListener('change', () => this.onStateChange());
+                this.district.select.addEventListener('change', () => this.onDistrictChange());
+                this.taluka.select.addEventListener('change', () => this.onTalukaChange());
+                this.village.select.addEventListener('change', () => this.onVillageChange());
+            },
+
+            async loadLocationsDatabase() {
+                try {
+                    console.log('📍 Loading locations database from: /data/indiaLocations.json');
+                    this.showLoading('state');
+
+                    const response = await fetch('../data/indiaLocations.json');
+                    if (!response.ok) {
+                        throw new Error(`Failed to load JSON: ${response.status}`);
+                    }
+
+                    locationsDatabase = await response.json();
+                    console.log('✅ Locations database loaded successfully');
+                    this.hideLoading('state');
+                } catch (error) {
+                    console.error('❌ Failed to load locations database:', error);
+                    this.showError('state', 'Failed to load location data. Please refresh the page.');
+                    this.hideLoading('state');
+                }
+            },
+
+            populateStates() {
+                if (!locationsDatabase || !locationsDatabase.India) {
+                    console.error('❌ Invalid locations database structure');
+                    return;
+                }
+
+                const states = Object.keys(locationsDatabase.India).sort();
+                const select = this.state.select;
+                const option = select.options[0];
+                select.innerHTML = '';
+                select.appendChild(option);
+
+                states.forEach(stateName => {
+                    const optElement = document.createElement('option');
+                    optElement.value = stateName;
+                    optElement.textContent = stateName;
+                    select.appendChild(optElement);
+                });
+
+                console.log(`✅ ${states.length} states loaded`);
+            },
+
+            populateDistricts(stateName) {
+                const districts = Object.keys(locationsDatabase.India[stateName] || {}).sort();
+                const select = this.district.select;
+                const option = select.options[0];
+                select.innerHTML = '';
+                select.appendChild(option);
+
+                districts.forEach(districtName => {
+                    const optElement = document.createElement('option');
+                    optElement.value = districtName;
+                    optElement.textContent = districtName;
+                    select.appendChild(optElement);
+                });
+
+                console.log(`✅ ${districts.length} districts loaded for ${stateName}`);
+            },
+
+            populateTalukas(stateName, districtName) {
+                const talukas = Object.keys(
+                    locationsDatabase.India[stateName]?.[districtName] || {}
+                ).sort();
+
+                const select = this.taluka.select;
+                const option = select.options[0];
+                select.innerHTML = '';
+                select.appendChild(option);
+
+                talukas.forEach(talukaName => {
+                    const optElement = document.createElement('option');
+                    optElement.value = talukaName;
+                    optElement.textContent = talukaName;
+                    select.appendChild(optElement);
+                });
+
+                console.log(`✅ ${talukas.length} talukas loaded for ${districtName}`);
+            },
+
+            populateVillages(stateName, districtName, talukaName) {
+                const villages = locationsDatabase.India[stateName]?.[districtName]?.[talukaName] || [];
+
+                const select = this.village.select;
+                const option = select.options[0];
+                select.innerHTML = '';
+                select.appendChild(option);
+
+                villages.forEach(village => {
+                    const optElement = document.createElement('option');
+                    optElement.value = JSON.stringify(village);
+                    optElement.textContent = village.name;
+                    select.appendChild(optElement);
+                });
+
+                console.log(`✅ ${villages.length} villages loaded for ${talukaName}`);
+            },
+
+            showLoading(level) {
+                this[level].container.classList.add('loading');
+            },
+
+            hideLoading(level) {
+                this[level].container.classList.remove('loading');
+            },
+
+            showError(level, message) {
+                this[level].error.textContent = message;
+                this[level].error.classList.add('show');
+            },
+
+            hideError(level) {
+                this[level].error.classList.remove('show');
+            },
+
+
+
+            onStateChange() {
+                if (!this.state.select.value) return;
+
+                const selectedStateName = this.state.select.value;
+                this.selected.state = selectedStateName;
+                console.log('📍 State selected:', selectedStateName);
+
+                // Reset dependent fields
+                this.selected.district = null;
+                this.selected.taluka = null;
+                this.selected.village = null;
+
+                this.district.select.innerHTML = '<option value="">Select District</option>';
+                this.taluka.select.innerHTML = '<option value="">Select Taluka</option>';
+                this.village.select.innerHTML = '<option value="">Select Village</option>';
+                this.district.select.disabled = false;
+                this.taluka.select.disabled = true;
+                this.village.select.disabled = true;
+
+                this.populateDistricts(selectedStateName);
+                this.updateValidation();
+            },
+
+            onDistrictChange() {
+                if (!this.district.select.value) return;
+
+                const selectedDistrictName = this.district.select.value;
+                this.selected.district = selectedDistrictName;
+                console.log('📍 District selected:', selectedDistrictName);
+
+                // Reset dependent fields
+                this.selected.taluka = null;
+                this.selected.village = null;
+
+                this.taluka.select.innerHTML = '<option value="">Select Taluka</option>';
+                this.village.select.innerHTML = '<option value="">Select Village</option>';
+                this.taluka.select.disabled = false;
+                this.village.select.disabled = true;
+
+                this.populateTalukas(this.selected.state, selectedDistrictName);
+                this.updateValidation();
+            },
+
+            onTalukaChange() {
+                if (!this.taluka.select.value) return;
+
+                const selectedTalukaName = this.taluka.select.value;
+                this.selected.taluka = selectedTalukaName;
+                console.log('📍 Taluka selected:', selectedTalukaName);
+
+                // Reset dependent field
+                this.selected.village = null;
+                this.village.select.innerHTML = '<option value="">Select Village</option>';
+                this.village.select.disabled = false;
+
+                this.populateVillages(this.selected.state, this.selected.district, selectedTalukaName);
+                this.updateValidation();
+            },
+
+            onVillageChange() {
+                if (!this.village.select.value) return;
+
+                const selectedVillageJSON = this.village.select.value;
+                const selectedVillage = JSON.parse(selectedVillageJSON);
+                this.selected.village = selectedVillage;
+                console.log('📍 Village selected:', selectedVillage);
+
+                this.updateValidation();
+            },
+
+            updateValidation() {
+                const validationMsg = document.getElementById('locationValidation');
+                if (this.isComplete()) {
+                    validationMsg.classList.add('show');
+                } else {
+                    validationMsg.classList.remove('show');
+                }
+            },
+
+            isComplete() {
+                return !!(this.selected.state && this.selected.district && this.selected.taluka && this.selected.village);
+            },
+
+            getSelected() {
+                return this.isComplete() ? this.selected : null;
+            }
+        };
+
+        // ====================================
+        // Form Elements
+        // ====================================
         const form = document.getElementById('signUpForm');
         const fullNameInput = document.getElementById('fullName');
         const emailInput = document.getElementById('email');
@@ -383,10 +769,18 @@
             const email = emailInput.value.trim();
             const password = passwordInput.value;
             const confirmPassword = confirmPasswordInput.value;
+            const locationData = LocationSelector.getSelected();
 
             // Validation
-            if (!fullName || !email || !password || !confirmPassword) {
-                showAlert('Please fill in all fields');
+            if (!fullName || !email || !locationData || !password || !confirmPassword) {
+                showAlert('Please fill in all fields including location');
+                console.log('🔴 Validation failed:', {
+                    fullName: !!fullName,
+                    email: !!email,
+                    location: !!locationData,
+                    password: !!password,
+                    confirmPassword: !!confirmPassword
+                });
                 return;
             }
 
@@ -410,15 +804,52 @@
             btnText.textContent = 'Creating account...';
             spinner.style.display = 'inline-block';
 
+            console.log('📝 Form data being sent to signup:', {
+                email,
+                fullName,
+                location: locationData
+            });
+
             const result = await authService.signUp(email, password, {
-                fullName: fullName
+                fullName: fullName,
+                location: `${locationData.village.name}, ${locationData.taluka}`
             });
 
             if (result.success) {
-                showAlert('Account created successfully! Redirecting...', 'success');
-                setTimeout(() => {
-                    window.location.href = '../dashboard/dashboard.html';
-                }, 1500);
+                console.log("✅ Sign-up successful, user created:", result.user.uid);
+
+                // EXPLICIT STRUCTURED LOCATION WRITE
+                try {
+                    console.log("📍 Writing structured location to database...");
+                    const userId = result.user.uid;
+                    const now = new Date().toISOString();
+
+                    // Build structured location with proper name/code format
+                    const structuredLocation = {
+                        country: "India",
+                        state: { name: locationData.state },
+                        district: { name: locationData.district },
+                        taluka: { name: locationData.taluka },
+                        village: locationData.village, // already has {name, code}
+                        updatedAt: now
+                    };
+
+                    await set(ref(db, `users/${userId}/location`), structuredLocation);
+
+                    console.log("✅ Location written successfully:", structuredLocation);
+                    showAlert('Account created successfully! Redirecting...', 'success');
+
+                    // Wait additional time to ensure Firebase syncs all data
+                    setTimeout(() => {
+                        window.location.href = '../dashboard/dashboard.html';
+                    }, 2500);
+                } catch (locationError) {
+                    console.error("❌ CRITICAL: Location write failed:", locationError.message);
+                    showAlert('Error saving location. Please try again.', 'error');
+                    form.classList.remove('loading');
+                    btnText.textContent = 'Create Account';
+                    spinner.style.display = 'none';
+                }
             } else {
                 showAlert(result.error || 'Sign up failed');
                 form.classList.remove('loading');
@@ -436,9 +867,10 @@
 
             if (result.success) {
                 showAlert('Account created successfully! Redirecting...', 'success');
+                // Wait additional time to ensure Firebase syncs all data
                 setTimeout(() => {
                     window.location.href = '../dashboard/dashboard.html';
-                }, 1500);
+                }, 2500);
             } else {
                 showAlert(result.error || 'Google sign up failed');
                 googleSignUp.disabled = false;
@@ -451,6 +883,12 @@
             if (user) {
                 window.location.href = '../dashboard/dashboard.html';
             }
+        });
+
+        // Initialize Location Selector on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            LocationSelector.init();
+            console.log('📍 Location selector initialized');
         });
     </script>
 </body>

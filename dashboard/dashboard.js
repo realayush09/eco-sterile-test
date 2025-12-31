@@ -10,6 +10,7 @@ import {
   userService,
   systemService,
 } from "../services/firebase.js";
+import { weatherService } from "../services/weather.js";
 import { HeaderComponent } from "../components/header.js";
 import { StatusIndicatorComponent } from "../components/status-indicator.js";
 import { PumpLogComponent } from "../components/pump-log.js";
@@ -92,12 +93,77 @@ async function initializeDashboard() {
 // Load User Profile
 // ==========================================
 async function loadUserProfile() {
+  console.log("📊 Loading user profile for:", appState.user.uid);
+
   const result = await userService.getProfile(appState.user.uid);
 
   if (result.success) {
+    console.log("✅ Profile retrieved:", result.profile);
     appState.profile = result.profile;
+
+    // Ensure location node exists (migration for legacy accounts)
+    console.log("🔄 Checking if location node exists...");
+    const ensureResult = await userService.ensureLocationExists(
+      appState.user.uid
+    );
+    if (ensureResult.created) {
+      console.log("✨ Location node was created for legacy account");
+    }
+
+    // Get user location from persistent location object
+    console.log("📍 Getting location from database...");
+    const locationResult = await userService.getLocation(appState.user.uid);
+    console.log("📍 Location result:", JSON.stringify(locationResult));
+
+    // Defensive: Handle location result properly
+    let location = "Karimganj, Assam"; // Default fallback
+
+    if (locationResult.success) {
+      // Check if location is genuinely provided (not empty object)
+      const displayLoc = locationResult.location;
+
+      // Only use non-"Not provided" values
+      if (
+        displayLoc &&
+        displayLoc !== "Not provided" &&
+        displayLoc.trim() !== ""
+      ) {
+        location = displayLoc;
+        console.log("✅ Using location from database:", location);
+      } else {
+        console.log("⚠️  Location is empty, using default:", location);
+        console.log("   isEmpty flag:", locationResult.isEmpty);
+      }
+    } else {
+      console.warn("⚠️  Error retrieving location:", locationResult.error);
+      console.log("   Using default fallback:", location);
+    }
+
+    console.log("📍 Final location to display:", location);
+    document.getElementById("farmLocation").textContent = location;
+
+    // Format and display last visited
+    if (result.profile.lastVisited) {
+      const lastVisitDate = new Date(result.profile.lastVisited);
+      document.getElementById("lastVisit").textContent =
+        lastVisitDate.toLocaleDateString() +
+        " " +
+        lastVisitDate.toLocaleTimeString();
+    } else {
+      document.getElementById("lastVisit").textContent = "First visit";
+    }
+
+    // Load weather for the location
+    await loadWeather(location);
+
     appState.optimalPHMin = parseFloat(result.profile.cropMinPH) || 6.5;
     appState.optimalPHMax = parseFloat(result.profile.cropMaxPH) || 7.5;
+    console.log(
+      "🌾 Crop pH range set:",
+      appState.optimalPHMin,
+      "-",
+      appState.optimalPHMax
+    );
 
     // Set current crop if saved
     if (result.profile.currentCrop) {
@@ -108,6 +174,24 @@ async function loadUserProfile() {
         appState.currentCrop = crop;
       }
     }
+  }
+}
+
+// ==========================================
+// Load Weather
+// ==========================================
+async function loadWeather(location) {
+  const weather = await weatherService.getWeather(location);
+
+  if (weather.success) {
+    document.getElementById("weatherIcon").textContent = weather.icon;
+    document.getElementById("weatherTemp").textContent = weather.temp + "°C";
+    document.getElementById("weatherDesc").textContent = weather.description;
+    document.getElementById("weatherLocation").textContent = weather.location;
+    document.getElementById("weatherHumidity").textContent =
+      weather.humidity + "%";
+    document.getElementById("weatherWind").textContent =
+      weather.windSpeed + " km/h";
   }
 }
 
@@ -211,17 +295,22 @@ function initializePHChart() {
 // Load pH Readings
 // ==========================================
 async function loadPhReadings() {
+  console.log("Loading pH readings for user:", appState.user.uid);
   const result = await phService.getReadings(appState.user.uid, 500);
 
   if (result.success) {
     appState.phReadings = result.readings;
+    console.log("pH readings loaded successfully:", appState.phReadings.length);
     updatePHChart("24h");
     updatePHStats();
+  } else {
+    console.error("Failed to load pH readings:", result.error);
   }
 
   // Listen for real-time updates
   phService.onReadingsUpdate(appState.user.uid, (readings) => {
     appState.phReadings = readings;
+    console.log("pH readings updated in real-time:", readings.length);
 
     // Update display with latest reading
     if (readings.length > 0) {
@@ -238,16 +327,21 @@ async function loadPhReadings() {
 // Load Pump Logs
 // ==========================================
 async function loadPumpLogs() {
+  console.log("Loading pump logs for user:", appState.user.uid);
   const result = await pumpService.getLogs(appState.user.uid, 100);
 
   if (result.success) {
     appState.pumpLogs = result.logs;
+    console.log("Pump logs loaded successfully:", appState.pumpLogs.length);
     pumpLogComponent.render(appState.pumpLogs);
+  } else {
+    console.error("Failed to load pump logs:", result.error);
   }
 
   // Listen for real-time updates
   pumpService.onLogsUpdate(appState.user.uid, (logs) => {
     appState.pumpLogs = logs;
+    console.log("Pump logs updated in real-time:", logs.length);
     pumpLogComponent.render(appState.pumpLogs);
   });
 }
