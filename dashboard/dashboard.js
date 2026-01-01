@@ -1121,7 +1121,164 @@ async function checkAndActivatePump(pH) {
 // ==========================================
 // Setup Event Listeners
 // ==========================================
+// ==========================================
+// Arduino Web Serial Connection
+// ==========================================
+let currentPort = null;
+
+async function connectArduino() {
+  if (!("serial" in navigator)) {
+    showNotification(
+      "Web Serial API not supported. Use Chrome, Edge, or Opera.",
+      "error"
+    );
+    return;
+  }
+
+  try {
+    console.log("🔌 Requesting serial port...");
+    const port = await navigator.serial.requestPort();
+
+    if (!port) {
+      console.log("User cancelled port selection.");
+      return;
+    }
+
+    console.log("🔌 Opening port at 9600 baud...");
+    await port.open({ baudRate: 9600 });
+    console.log("✅ Port opened successfully.");
+    currentPort = port;
+
+    appState.systemStatus.arduinoConnected = true;
+    updateArduinoStatus(true);
+    showNotification("✅ Arduino connected! Reading live data...", "success");
+
+    const textDecoder = new TextDecoder();
+    const reader = port.readable.getReader();
+
+    let buffer = "";
+
+    try {
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) {
+          console.log("Serial port closed.");
+          break;
+        }
+        if (!value) continue;
+
+        buffer += textDecoder.decode(value, { stream: true });
+        const lines = buffer.split(/\r?\n/);
+        buffer = lines.pop();
+
+        for (const rawLine of lines) {
+          const line = rawLine.trim();
+          if (!line) continue;
+
+          try {
+            const obj = JSON.parse(line);
+
+            // pH reading from Arduino
+            if (obj.pH !== undefined) {
+              const pH = parseFloat(obj.pH);
+              if (!isNaN(pH)) {
+                addPHReading(pH);
+                console.log("🔌 Arduino pH reading:", pH);
+              }
+            }
+
+            // Pump activity reported by Arduino
+            if (obj.pump) {
+              const pumpRaw = obj.pump.toLowerCase();
+              let pumpType = null;
+
+              if (pumpRaw.includes("basic")) pumpType = "basic";
+              else if (pumpRaw.includes("acidic")) pumpType = "acidic";
+
+              if (pumpType && pumpType !== "off") {
+                logPumpActivity(pumpType, "1%");
+                appState.systemStatus.pumpStatus = pumpType;
+                console.log("🔌 Arduino pump:", pumpType);
+              }
+            }
+          } catch (parseError) {
+            console.log("Non-JSON from Arduino:", line);
+          }
+        }
+      }
+    } finally {
+      try {
+        reader.releaseLock();
+      } catch (e) {}
+    }
+
+    // Close port and cleanup
+    try {
+      await port.close();
+    } catch (e) {}
+    currentPort = null;
+    appState.systemStatus.arduinoConnected = false;
+    updateArduinoStatus(false);
+    showNotification("⚠️ Arduino disconnected.", "warning");
+  } catch (error) {
+    console.error("Serial error:", error);
+    const errorMsg = error.message || error.toString();
+
+    if (!errorMsg.includes("cancelled")) {
+      showNotification("Arduino connection failed: " + errorMsg, "error");
+    }
+    currentPort = null;
+    appState.systemStatus.arduinoConnected = false;
+    updateArduinoStatus(false);
+  }
+}
+
+async function disconnectArduino() {
+  if (currentPort) {
+    try {
+      await currentPort.close();
+      currentPort = null;
+      appState.systemStatus.arduinoConnected = false;
+      updateArduinoStatus(false);
+      showNotification("✅ Arduino disconnected.", "success");
+    } catch (error) {
+      console.error("Error closing port:", error);
+    }
+  }
+}
+
+function updateArduinoStatus(isConnected) {
+  appState.systemStatus.arduinoConnected = isConnected;
+  appState.systemStatus.lastUpdate = new Date();
+  statusComponent.render(appState.systemStatus);
+
+  // Re-attach button listener after re-rendering
+  const connectBtn = document.getElementById("connectArduinoBtn");
+  if (connectBtn) {
+    connectBtn.onclick = () => {
+      if (appState.systemStatus.arduinoConnected) {
+        disconnectArduino();
+      } else {
+        connectArduino();
+      }
+    };
+  }
+}
+
+// ==========================================
 function setupEventListeners() {
+  // Arduino Connect Button
+  const connectBtn = document.getElementById("connectArduinoBtn");
+  if (connectBtn) {
+    connectBtn.addEventListener("click", () => {
+      if (appState.systemStatus.arduinoConnected) {
+        disconnectArduino();
+      } else {
+        connectArduino();
+      }
+    });
+  }
+
   // Time filter buttons
   document.querySelectorAll(".time-filter-btn").forEach((btn) => {
     btn.addEventListener("click", (e) => {
