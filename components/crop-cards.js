@@ -58,12 +58,14 @@ export class CropCardsComponent {
     const cardsHTML = crops
       .map((crop) => {
         const isSelected = this.currentCrop?.value === crop.value;
+        // Use crop.image if available, otherwise fallback to crop.value
+        const imageSrc = crop.image || `${crop.value}.png`;
         return `
         <div class="crop-card ${isSelected ? "selected" : ""}" data-value="${
           crop.value
         }">
           <div class="crop-image">
-            <img src="../images/${crop.value}.png" alt="${crop.label}" 
+            <img src="../images/${imageSrc}" alt="${crop.label}" 
               onerror="this.src='https://via.placeholder.com/150?text=${
                 crop.label
               }'">
@@ -110,15 +112,115 @@ export class CropCardsComponent {
   }
 
   /**
-   * Filter crops by search term
+   * Filter crops by search term (searches label, value, and synonyms)
    */
   filterCrops(searchTerm) {
     const cards = document.querySelectorAll(".crop-card");
-    const term = searchTerm.toLowerCase();
+    const term = searchTerm.toLowerCase().trim();
+
+    // If empty search, show all
+    if (!term) {
+      cards.forEach((card) => {
+        card.style.display = "";
+      });
+      return;
+    }
 
     cards.forEach((card) => {
       const label = card.querySelector("h4").textContent.toLowerCase();
-      card.style.display = label.includes(term) ? "" : "none";
+      const value = card.getAttribute("data-value").toLowerCase();
+
+      // Search in label and value
+      const matches = label.includes(term) || value.includes(term);
+
+      // Also check for synonyms/keywords
+      const synonymMap = {
+        dhaan: "rice",
+        gehun: "wheat",
+        chana: "chickpea",
+        arhar: "pigeon_pea",
+        masoor: "lentil",
+        mung: "moong",
+        matar: "peas",
+        bhindi: "okra",
+        karela: "bitter_melon",
+        chukandar: "beet",
+        pudina: "mint",
+        tulsi: "basil",
+        til: "sesame",
+        methi: "fenugreek",
+        jowar: "sorghum",
+        bajra: "millet",
+        peanut: "groundnut",
+        bean: ["moong", "urad", "beans"],
+        green: ["spinach", "lettuce", "kale"],
+        root: ["carrot", "radish", "turnip", "beet", "potato"],
+        leafy: ["spinach", "lettuce", "cabbage", "kale"],
+        spice: [
+          "turmeric",
+          "ginger",
+          "coriander",
+          "cumin",
+          "fenugreek",
+          "black_pepper",
+        ],
+        oil: [
+          "soybean",
+          "groundnut",
+          "sunflower",
+          "mustard",
+          "sesame",
+          "safflower",
+        ],
+        cereal: [
+          "rice",
+          "wheat",
+          "maize",
+          "barley",
+          "oats",
+          "rye",
+          "millet",
+          "sorghum",
+        ],
+        pulse: [
+          "chickpea",
+          "pigeon_pea",
+          "lentil",
+          "moong",
+          "urad",
+          "peas",
+          "beans",
+        ],
+        fruit: [
+          "mango",
+          "banana",
+          "apple",
+          "orange",
+          "lemon",
+          "grape",
+          "strawberry",
+          "guava",
+          "papaya",
+          "pineapple",
+        ],
+      };
+
+      let hasMatch = matches;
+
+      // Check synonyms
+      if (!hasMatch) {
+        for (const [keyword, crops] of Object.entries(synonymMap)) {
+          if (term.includes(keyword)) {
+            const cropList = Array.isArray(crops) ? crops : [crops];
+            if (cropList.includes(value)) {
+              hasMatch = true;
+              break;
+            }
+          }
+        }
+      }
+
+      card.style.display = hasMatch ? "" : "none";
     });
   }
 
