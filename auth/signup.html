@@ -11,7 +11,7 @@
         .auth-container {
             display: flex;
             min-height: 100vh;
-            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+            background: #ffffff;
         }
 
         .auth-panel {
@@ -24,13 +24,33 @@
         }
 
         .auth-left {
-            background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-teal) 100%);
-            color: white;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: rgba(255, 255, 255, 0.9);
             display: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .auth-left::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .auth-left>div {
+            position: relative;
+            z-index: 1;
         }
 
         .auth-right {
-            background-color: var(--bg-primary);
+            background-color: #ffffff;
         }
 
         @media (min-width: 768px) {
@@ -64,13 +84,15 @@
 
         .auth-header h1 {
             font-size: 1.75rem;
-            color: var(--text-primary);
+            color: #111827;
             margin-bottom: var(--space-2);
+            font-weight: 600;
         }
 
         .auth-header p {
-            color: var(--text-tertiary);
+            color: #4b5563;
             margin: 0;
+            font-weight: 400;
         }
 
         .form-row {
@@ -83,7 +105,7 @@
             display: flex;
             align-items: center;
             margin: var(--space-6) 0;
-            gap: var(--space-4);
+            gap: 0;
         }
 
         .form-divider::before,
@@ -91,12 +113,16 @@
             content: '';
             flex: 1;
             height: 1px;
-            background-color: var(--bg-tertiary);
+            background-color: #e5e7eb;
         }
 
         .form-divider-text {
-            color: var(--text-tertiary);
-            font-size: 0.875rem;
+            color: #9ca3af;
+            font-size: 0.75rem;
+            padding: 0 var(--space-3);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .social-buttons {
@@ -107,11 +133,11 @@
 
         .social-btn {
             flex: 1;
-            padding: var(--space-3) var(--space-4);
-            border: 1px solid var(--gray-600);
-            background-color: var(--bg-secondary);
-            border-radius: var(--radius-md);
-            color: var(--text-primary);
+            padding: var(--space-3) var(--space-6);
+            border: 1px solid #d1d5db;
+            background-color: #ffffff;
+            border-radius: 8px;
+            color: #111827;
             cursor: pointer;
             transition: all var(--transition-base);
             font-weight: 500;
@@ -119,11 +145,13 @@
             align-items: center;
             justify-content: center;
             gap: var(--space-2);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
         }
 
         .social-btn:hover {
-            background-color: var(--bg-tertiary);
-            border-color: var(--primary-color);
+            background-color: #f3f4f6;
+            border-color: #b5bcc4;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
         .social-btn img {
@@ -134,16 +162,17 @@
         .auth-footer {
             text-align: center;
             margin-top: var(--space-6);
-            color: var(--text-tertiary);
+            color: #4b5563;
         }
 
         .auth-footer a {
-            color: var(--primary-color);
+            color: #10b981;
             text-decoration: none;
             font-weight: 500;
         }
 
         .auth-footer a:hover {
+            color: #059669;
             text-decoration: underline;
         }
 
@@ -166,74 +195,214 @@
             animation: spin 1s linear infinite;
         }
 
+        .password-helper {
+            font-size: 0.75rem;
+            color: #9ca3af;
+            margin-top: var(--space-1);
+            margin-bottom: var(--space-2);
+        }
+
         .password-strength {
             margin-top: var(--space-2);
-            height: 4px;
-            background-color: var(--bg-tertiary);
-            border-radius: var(--radius-sm);
+            height: 3px;
+            background-color: #e5e7eb;
+            border-radius: 2px;
             overflow: hidden;
+            margin-bottom: var(--space-1);
         }
 
         .password-strength-bar {
             height: 100%;
             width: 0%;
-            background-color: var(--danger-color);
-            transition: all 300ms;
+            background-color: #ef4444;
+            transition: all 200ms ease;
         }
 
         .password-strength-bar.weak {
             width: 33%;
-            background-color: var(--danger-color);
+            background-color: #ef4444;
         }
 
         .password-strength-bar.medium {
             width: 66%;
-            background-color: var(--warning-color);
+            background-color: #f59e0b;
         }
 
         .password-strength-bar.strong {
             width: 100%;
-            background-color: var(--success-color);
+            background-color: #10b981;
+        }
+
+        .password-strength-text {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: #9ca3af;
+            margin-top: var(--space-1);
+            text-transform: capitalize;
+            min-height: 1rem;
+        }
+
+        .password-strength-text.weak {
+            color: #ef4444;
+        }
+
+        .password-strength-text.medium {
+            color: #f59e0b;
+        }
+
+        .password-strength-text.strong {
+            color: #10b981;
         }
 
         .location-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: var(--space-4);
+            gap: var(--space-3);
             margin-bottom: var(--space-4);
         }
 
-        .location-select {
+        .custom-dropdown {
             position: relative;
+            width: 100%;
         }
 
-        .location-select select {
+        .dropdown-trigger {
             width: 100%;
-            padding: var(--space-3) var(--space-4);
-            background-color: var(--bg-secondary);
-            border: 1px solid var(--gray-600);
-            border-radius: var(--radius-md);
-            color: var(--text-primary);
+            padding: 10px 12px;
+            background-color: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            color: #111827;
             font-size: 0.875rem;
             cursor: pointer;
-            transition: all var(--transition-base);
+            transition: all 150ms ease;
+            height: 40px;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
 
-        .location-select select:hover:not(:disabled) {
-            border-color: var(--primary-color);
-            background-color: var(--bg-tertiary);
+        .dropdown-trigger:hover:not(:disabled) {
+            border-color: #10b981;
+            background-color: #ffffff;
         }
 
-        .location-select select:focus {
+        .dropdown-trigger:focus {
             outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(45, 212, 191, 0.1);
+            border-color: #10b981;
+            background-color: #ffffff;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
         }
 
-        .location-select select:disabled {
+        .dropdown-trigger:disabled {
             opacity: 0.5;
             cursor: not-allowed;
-            background-color: var(--bg-tertiary);
+            background-color: #f3f4f6;
+        }
+
+        .dropdown-trigger-text {
+            flex: 1;
+            text-align: left;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .dropdown-chevron {
+            width: 16px;
+            height: 16px;
+            margin-left: 8px;
+            transition: transform 150ms ease;
+            flex-shrink: 0;
+        }
+
+        .dropdown-trigger.open .dropdown-chevron {
+            transform: rotate(180deg);
+        }
+
+        .dropdown-panel {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin-top: 4px;
+            z-index: 1000;
+            display: none;
+            max-height: 280px;
+            overflow: hidden;
+            flex-direction: column;
+        }
+
+        .dropdown-panel.open {
+            display: flex;
+        }
+
+        .dropdown-search {
+            padding: 10px 12px;
+            border-bottom: 1px solid #e5e7eb;
+            flex-shrink: 0;
+        }
+
+        .dropdown-search input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            background-color: #f9fafb;
+            color: #111827;
+            font-size: 0.875rem;
+            font-family: inherit;
+            transition: all 150ms ease;
+        }
+
+        .dropdown-search input:focus {
+            outline: none;
+            border-color: #10b981;
+            background-color: #ffffff;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        }
+
+        .dropdown-search input::placeholder {
+            color: #9ca3af;
+        }
+
+        .dropdown-options {
+            overflow-y: auto;
+            flex: 1;
+            padding: 4px 0;
+        }
+
+        .dropdown-option {
+            padding: 10px 12px;
+            color: #111827;
+            cursor: pointer;
+            transition: all 150ms ease;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .dropdown-option:hover {
+            background-color: #f0fdf4;
+            color: #059669;
+        }
+
+        .dropdown-option.selected {
+            background-color: #d1fae5;
+            color: #047857;
+            font-weight: 500;
+        }
+
+        .dropdown-empty {
+            padding: 20px 12px;
+            text-align: center;
+            color: #9ca3af;
+            font-size: 0.875rem;
         }
 
         .location-select .loading-indicator {
@@ -243,12 +412,13 @@
             transform: translateY(-50%);
             width: 16px;
             height: 16px;
-            border: 2px solid rgba(45, 212, 191, 0.3);
+            border: 2px solid rgba(16, 185, 129, 0.3);
             border-radius: 50%;
-            border-top-color: var(--primary-color);
+            border-top-color: #10b981;
             animation: spin 1s linear infinite;
             pointer-events: none;
             display: none;
+            z-index: 1;
         }
 
         .location-select.loading .loading-indicator {
@@ -256,7 +426,7 @@
         }
 
         .location-error {
-            color: var(--danger-color);
+            color: #ef4444;
             font-size: 0.75rem;
             margin-top: var(--space-2);
             display: none;
@@ -267,7 +437,7 @@
         }
 
         .location-validation {
-            color: var(--success-color);
+            color: #10b981;
             font-size: 0.75rem;
             margin-top: var(--space-2);
             display: none;
@@ -281,22 +451,47 @@
             display: flex;
             align-items: flex-start;
             gap: var(--space-2);
+            margin-top: var(--space-6);
             margin-bottom: var(--space-4);
+            padding-top: var(--space-4);
+            border-top: 1px solid #e5e7eb;
         }
 
         .checkbox-group input[type="checkbox"] {
-            width: auto;
-            margin-top: 4px;
+            width: 18px;
+            height: 18px;
+            min-width: 18px;
+            margin-top: 2px;
             cursor: pointer;
+            accent-color: #10b981;
         }
 
         .checkbox-label {
             font-size: 0.875rem;
-            color: var(--text-secondary);
+            color: #374151;
+            line-height: 1.5;
         }
 
         .checkbox-label a {
-            color: var(--primary-color);
+            color: #10b981;
+            font-weight: 500;
+            text-decoration: underline;
+        }
+
+        .checkbox-label a:hover {
+            color: #059669;
+        }
+
+        .social-btn {
+            transition: all 150ms ease;
+        }
+
+        .btn-primary {
+            transition: all 150ms ease;
+        }
+
+        .btn-primary:active:not(:disabled) {
+            transform: translateY(0);
         }
 
         @media (max-width: 768px) {
@@ -311,6 +506,10 @@
             .form-row {
                 grid-template-columns: 1fr;
             }
+
+            .location-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
@@ -320,21 +519,25 @@
         <!-- Left Panel (Hidden on mobile) -->
         <div class="auth-panel auth-left">
             <div>
-                <h2 style="font-size: 2rem; margin-bottom: var(--space-6);">🌱 Join EcoSterile</h2>
-                <p style="font-size: 1.125rem; line-height: 1.8; opacity: 0.95;">
+                <h2
+                    style="font-size: 2rem; margin-bottom: var(--space-6); font-weight: 600; color: rgba(255, 255, 255, 0.95);">
+                    🌱 Join EcoSterile</h2>
+                <p
+                    style="font-size: 1.125rem; line-height: 1.8; color: rgba(255, 255, 255, 0.9); margin: 0 0 var(--space-8) 0;">
                     Start monitoring your crops today with precision pH control and real-time analytics.
                 </p>
                 <div
                     style="margin-top: var(--space-8); padding-top: var(--space-8); border-top: 1px solid rgba(255,255,255,0.1);">
                     <div
-                        style="display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-4);">
+                        style="display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-4); color: rgba(255, 255, 255, 0.9);">
                         <span>✓ No credit card required</span>
                     </div>
                     <div
-                        style="display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-4);">
+                        style="display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-4); color: rgba(255, 255, 255, 0.9);">
                         <span>✓ 24/7 Support</span>
                     </div>
-                    <div style="display: flex; align-items: center; gap: var(--space-3);">
+                    <div
+                        style="display: flex; align-items: center; gap: var(--space-3); color: rgba(255, 255, 255, 0.9);">
                         <span>✓ Industrial-grade monitoring</span>
                     </div>
                 </div>
@@ -373,27 +576,69 @@
                         <div class="location-grid">
                             <!-- State -->
                             <div class="location-select" id="stateSelectContainer">
-                                <select id="stateSelect" required>
-                                    <option value="">Select State</option>
-                                </select>
+                                <div class="custom-dropdown" id="stateDropdown">
+                                    <button type="button" class="dropdown-trigger" disabled>
+                                        <span class="dropdown-trigger-text">Select State</span>
+                                        <svg class="dropdown-chevron" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd"
+                                                d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                                                clip-rule="evenodd" />
+                                        </svg>
+                                    </button>
+                                    <div class="dropdown-panel">
+                                        <div class="dropdown-search">
+                                            <input type="text" placeholder="Search state…"
+                                                class="dropdown-search-input">
+                                        </div>
+                                        <div class="dropdown-options"></div>
+                                    </div>
+                                </div>
                                 <div class="loading-indicator"></div>
                                 <div class="location-error" id="stateError"></div>
                             </div>
 
                             <!-- District -->
                             <div class="location-select" id="districtSelectContainer">
-                                <select id="districtSelect" disabled required>
-                                    <option value="">Select District</option>
-                                </select>
+                                <div class="custom-dropdown" id="districtDropdown">
+                                    <button type="button" class="dropdown-trigger" disabled>
+                                        <span class="dropdown-trigger-text">Select District</span>
+                                        <svg class="dropdown-chevron" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd"
+                                                d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                                                clip-rule="evenodd" />
+                                        </svg>
+                                    </button>
+                                    <div class="dropdown-panel">
+                                        <div class="dropdown-search">
+                                            <input type="text" placeholder="Search district…"
+                                                class="dropdown-search-input">
+                                        </div>
+                                        <div class="dropdown-options"></div>
+                                    </div>
+                                </div>
                                 <div class="loading-indicator"></div>
                                 <div class="location-error" id="districtError"></div>
                             </div>
 
                             <!-- Taluka -->
                             <div class="location-select" id="talukaSelectContainer">
-                                <select id="talukaSelect" disabled required>
-                                    <option value="">Select Taluka</option>
-                                </select>
+                                <div class="custom-dropdown" id="talukaDropdown">
+                                    <button type="button" class="dropdown-trigger" disabled>
+                                        <span class="dropdown-trigger-text">Select Taluka</span>
+                                        <svg class="dropdown-chevron" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd"
+                                                d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                                                clip-rule="evenodd" />
+                                        </svg>
+                                    </button>
+                                    <div class="dropdown-panel">
+                                        <div class="dropdown-search">
+                                            <input type="text" placeholder="Search taluka…"
+                                                class="dropdown-search-input">
+                                        </div>
+                                        <div class="dropdown-options"></div>
+                                    </div>
+                                </div>
                                 <div class="loading-indicator"></div>
                                 <div class="location-error" id="talukaError"></div>
                             </div>
@@ -404,10 +649,12 @@
                     <!-- Password -->
                     <div class="form-group">
                         <label class="form-label">Password</label>
+                        <div class="password-helper">Minimum 8 characters</div>
                         <input type="password" id="password" placeholder="••••••••" required>
                         <div class="password-strength">
                             <div id="passwordStrengthBar" class="password-strength-bar"></div>
                         </div>
+                        <div class="password-strength-text" id="passwordStrengthText"></div>
                     </div>
 
                     <!-- Confirm Password -->
@@ -440,7 +687,7 @@
                 <div class="social-buttons">
                     <button type="button" class="social-btn" id="googleSignUp">
                         <img src="https://freepnglogo.com/images/all_img/google-logo-2025-6ffb.png" alt="Google">
-                        <span>Google</span>
+                        <span>Continue with Google</span>
                     </button>
                 </div>
 
@@ -459,6 +706,12 @@
             ref,
             set,
         } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
+        import { CustomDropdown } from '../components/CustomDropdown.js';
+
+        // ====================================
+        // Custom Dropdown Components
+        // ====================================
+        let stateDropdown, districtDropdown, talukaDropdown;
 
         // ====================================
         // Static Location Data (No API Calls - No CORS Issues)
@@ -468,9 +721,9 @@
         // ====================================
 
         const LocationSelector = {
-            state: { select: null, error: null, container: null },
-            district: { select: null, error: null, container: null },
-            taluka: { select: null, error: null, container: null },
+            state: { dropdown: null, error: null, container: null },
+            district: { dropdown: null, error: null, container: null },
+            taluka: { dropdown: null, error: null, container: null },
 
             locationData: null, // Loaded once from indiaLocations.json
 
@@ -481,25 +734,26 @@
             },
 
             async init() {
-                this.state.select = document.getElementById('stateSelect');
+                // Initialize custom dropdowns
+                this.state.dropdown = stateDropdown = new CustomDropdown(document.getElementById('stateDropdown'));
                 this.state.error = document.getElementById('stateError');
                 this.state.container = document.getElementById('stateSelectContainer');
 
-                this.district.select = document.getElementById('districtSelect');
+                this.district.dropdown = districtDropdown = new CustomDropdown(document.getElementById('districtDropdown'));
                 this.district.error = document.getElementById('districtError');
                 this.district.container = document.getElementById('districtSelectContainer');
 
-                this.taluka.select = document.getElementById('talukaSelect');
+                this.taluka.dropdown = talukaDropdown = new CustomDropdown(document.getElementById('talukaDropdown'));
                 this.taluka.error = document.getElementById('talukaError');
                 this.taluka.container = document.getElementById('talukaSelectContainer');
 
                 // Load indiaLocations.json once
                 await this.loadLocationData();
 
-                // Event listeners
-                this.state.select.addEventListener('change', () => this.onStateChange());
-                this.district.select.addEventListener('change', () => this.onDistrictChange());
-                this.taluka.select.addEventListener('change', () => this.onTalukaChange());
+                // Event listeners for dropdowns
+                this.state.dropdown.onChange = () => this.onStateChange();
+                this.district.dropdown.onChange = () => this.onDistrictChange();
+                this.taluka.dropdown.onChange = () => this.onTalukaChange();
             },
 
             async loadLocationData() {
@@ -538,18 +792,8 @@
                         throw new Error('Invalid states data');
                     }
 
-                    const select = this.state.select;
-                    const option = select.options[0];
-                    select.innerHTML = '';
-                    select.appendChild(option);
-
-                    states.forEach(stateName => {
-                        const optElement = document.createElement('option');
-                        optElement.value = stateName;
-                        optElement.textContent = stateName;
-                        select.appendChild(optElement);
-                    });
-
+                    this.state.dropdown.setOptions(states);
+                    this.state.dropdown.setDisabled(false);
                     console.log(`✅ ${states.length} states loaded`);
                 } catch (error) {
                     console.error('❌ Failed to populate states:', error);
@@ -571,18 +815,9 @@
                         throw new Error(`No districts found for ${stateName}`);
                     }
 
-                    const select = this.district.select;
-                    const option = select.options[0];
-                    select.innerHTML = '';
-                    select.appendChild(option);
-
-                    districts.forEach(districtName => {
-                        const optElement = document.createElement('option');
-                        optElement.value = districtName;
-                        optElement.textContent = districtName;
-                        select.appendChild(optElement);
-                    });
-
+                    this.district.dropdown.clear();
+                    this.district.dropdown.setOptions(districts);
+                    this.district.dropdown.setDisabled(false);
                     this.hideLoading('district');
                     console.log(`✅ ${districts.length} districts loaded for ${stateName}`);
                 } catch (error) {
@@ -606,18 +841,9 @@
                         throw new Error(`No talukas found for ${districtName}`);
                     }
 
-                    const select = this.taluka.select;
-                    const option = select.options[0];
-                    select.innerHTML = '';
-                    select.appendChild(option);
-
-                    talukas.forEach(talukaName => {
-                        const optElement = document.createElement('option');
-                        optElement.value = talukaName;
-                        optElement.textContent = talukaName;
-                        select.appendChild(optElement);
-                    });
-
+                    this.taluka.dropdown.clear();
+                    this.taluka.dropdown.setOptions(talukas);
+                    this.taluka.dropdown.setDisabled(false);
                     this.hideLoading('taluka');
                     console.log(`✅ ${talukas.length} talukas loaded for ${districtName}`);
                 } catch (error) {
@@ -644,12 +870,10 @@
                 this[level].error.classList.remove('show');
             },
 
-
-
             onStateChange() {
-                if (!this.state.select.value) return;
+                if (!this.state.dropdown.getValue()) return;
 
-                const selectedStateName = this.state.select.value;
+                const selectedStateName = this.state.dropdown.getValue();
                 this.selected.state = selectedStateName;
                 console.log('📍 State selected:', selectedStateName);
 
@@ -657,10 +881,10 @@
                 this.selected.district = null;
                 this.selected.taluka = null;
 
-                this.district.select.innerHTML = '<option value="">Select District</option>';
-                this.taluka.select.innerHTML = '<option value="">Select Taluka</option>';
-                this.district.select.disabled = false;
-                this.taluka.select.disabled = true;
+                this.district.dropdown.clear();
+                this.taluka.dropdown.clear();
+                this.district.dropdown.setDisabled(false);
+                this.taluka.dropdown.setDisabled(true);
 
                 // Load districts for selected state
                 this.populateDistricts(selectedStateName);
@@ -668,18 +892,18 @@
             },
 
             onDistrictChange() {
-                if (!this.district.select.value) return;
+                if (!this.district.dropdown.getValue()) return;
 
                 const selectedStateName = this.selected.state;
-                const selectedDistrictName = this.district.select.value;
+                const selectedDistrictName = this.district.dropdown.getValue();
                 this.selected.district = selectedDistrictName;
                 console.log('📍 District selected:', selectedDistrictName);
 
                 // Reset dependent field
                 this.selected.taluka = null;
 
-                this.taluka.select.innerHTML = '<option value="">Select Taluka</option>';
-                this.taluka.select.disabled = false;
+                this.taluka.dropdown.clear();
+                this.taluka.dropdown.setDisabled(false);
 
                 // Load talukas for selected district
                 this.populateTalukas(selectedStateName, selectedDistrictName);
@@ -687,9 +911,9 @@
             },
 
             onTalukaChange() {
-                if (!this.taluka.select.value) return;
+                if (!this.taluka.dropdown.getValue()) return;
 
-                const selectedTalukaName = this.taluka.select.value;
+                const selectedTalukaName = this.taluka.dropdown.getValue();
                 this.selected.taluka = selectedTalukaName;
                 console.log('📍 Taluka selected:', selectedTalukaName);
 
@@ -749,6 +973,16 @@
             }
 
             passwordStrengthBar.className = `password-strength-bar ${strength}`;
+
+            // Update strength text display
+            const strengthText = document.getElementById('passwordStrengthText');
+            if (password.length > 0) {
+                strengthText.textContent = strength;
+                strengthText.className = `password-strength-text ${strength}`;
+            } else {
+                strengthText.textContent = '';
+                strengthText.className = 'password-strength-text';
+            }
         });
 
         // Sign Up Form Submit

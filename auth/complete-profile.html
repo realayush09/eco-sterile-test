@@ -12,12 +12,13 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            color-scheme: light;
         }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            color: #f1f5f9;
+            background: #ffffff;
+            color: #111827;
             min-height: 100vh;
         }
 
@@ -32,13 +33,12 @@
         .profile-box {
             width: 100%;
             max-width: 420px;
-            background: linear-gradient(180deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%);
-            border: 1px solid rgba(16, 185, 129, 0.15);
-            border-radius: 20px;
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
             padding: 40px 32px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4), 0 0 1px rgba(16, 185, 129, 0.1) inset;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
             animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-            backdrop-filter: blur(10px);
         }
 
         @keyframes slideUp {
@@ -59,14 +59,14 @@
 
         .profile-header h1 {
             font-size: 1.75rem;
-            font-weight: 700;
-            color: #f1f5f9;
+            font-weight: 600;
+            color: #111827;
             margin-bottom: 8px;
             letter-spacing: -0.5px;
         }
 
         .profile-header p {
-            color: #cbd5e1;
+            color: #4b5563;
             font-size: 0.9rem;
             font-weight: 400;
             line-height: 1.5;
@@ -74,7 +74,7 @@
 
         .alert {
             padding: 12px 16px;
-            border-radius: 12px;
+            border-radius: 8px;
             margin-bottom: 24px;
             font-size: 0.9rem;
             animation: slideDown 0.3s ease-out;
@@ -94,15 +94,15 @@
         }
 
         .alert-danger {
-            background: rgba(239, 68, 68, 0.08);
-            border-color: rgba(239, 68, 68, 0.3);
-            color: #fca5a5;
+            background: rgba(239, 68, 68, 0.1);
+            border-color: #ef4444;
+            color: #991b1b;
         }
 
         .alert-success {
-            background: rgba(16, 185, 129, 0.08);
-            border-color: rgba(16, 185, 129, 0.3);
-            color: #86efac;
+            background: rgba(16, 185, 129, 0.1);
+            border-color: #10b981;
+            color: #047857;
         }
 
         .form-section {
@@ -111,10 +111,10 @@
 
         .form-section-title {
             font-size: 0.8rem;
-            font-weight: 700;
+            font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 1px;
-            color: #64748b;
+            color: #9ca3af;
             margin-bottom: 16px;
             display: block;
         }
@@ -130,71 +130,72 @@
         .form-label {
             display: block;
             margin-bottom: 8px;
-            color: #e2e8f0;
+            color: #111827;
             font-weight: 500;
             font-size: 0.875rem;
             letter-spacing: -0.3px;
         }
 
         .required-indicator {
-            color: #ff6b6b;
+            color: #ef4444;
             margin-left: 4px;
         }
 
         .form-input,
         .form-select {
             width: 100%;
-            padding: 12px 16px;
-            border: 1.5px solid rgba(16, 185, 129, 0.2);
-            border-radius: 12px;
-            background: rgba(10, 17, 30, 0.95);
-            color: #f1f5f9;
+            padding: 10px 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            background: #f9fafb;
+            color: #111827;
             font-size: 0.95rem;
             font-family: inherit;
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: all 150ms ease;
             line-height: 1.5;
+            height: 40px;
         }
 
         .form-input::placeholder {
-            color: #64748b;
+            color: #9ca3af;
         }
 
         .form-input:hover,
         .form-select:hover {
-            border-color: rgba(16, 185, 129, 0.4);
-            background: rgba(10, 17, 30, 0.98);
+            border-color: #10b981;
+            background: #ffffff;
         }
 
         .form-input:focus,
         .form-select:focus {
             outline: none;
             border-color: #10b981;
-            background: rgba(15, 23, 42, 0.99);
-            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12), 0 0 0 1.5px rgba(16, 185, 129, 0.3);
+            background: #ffffff;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
         }
 
         .form-select {
             cursor: pointer;
             appearance: none;
             padding-right: 36px;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='M5.5 7.5L10 13L14.5 7.5' stroke='%2364748b' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='M5.5 7.5L10 13L14.5 7.5' stroke='%239ca3af' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
             background-repeat: no-repeat;
             background-position: right 12px center;
-            background-color: rgba(10, 17, 30, 0.95);
+            background-color: #f9fafb;
             padding-right: 40px;
         }
 
         .form-select:hover {
-            background-color: rgba(10, 17, 30, 0.98);
+            background-color: #ffffff;
         }
 
         .form-select:focus {
-            background-color: rgba(15, 23, 42, 0.99);
+            background-color: #ffffff;
         }
 
         .form-select option {
-            background: #1e293b;
-            color: #f1f5f9;
+            background: #ffffff;
+            color: #111827;
             padding: 8px 12px;
         }
 
@@ -206,13 +207,13 @@
         .form-select:disabled {
             opacity: 0.5;
             cursor: not-allowed;
-            background-color: rgba(10, 17, 30, 0.7);
+            background-color: #f3f4f6;
         }
 
         .location-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 16px;
+            gap: 12px;
         }
 
         .location-grid.full {
@@ -225,7 +226,7 @@
 
         .btn-submit {
             width: 100%;
-            padding: 14px 20px;
+            padding: 12px 20px;
             margin-top: 32px;
             background: linear-gradient(135deg, #10b981 0%, #059669 100%);
             border: none;
@@ -234,19 +235,18 @@
             font-weight: 600;
             font-size: 1rem;
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: all 150ms ease;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
             letter-spacing: -0.3px;
-            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.2);
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
         }
 
         .btn-submit:hover:not(:disabled) {
             transform: translateY(-2px);
-            box-shadow: 0 15px 40px rgba(16, 185, 129, 0.3);
-            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            box-shadow: 0 6px 16px rgba(16, 185, 129, 0.3);
         }
 
         .btn-submit:active:not(:disabled) {
@@ -279,20 +279,166 @@
             text-align: center;
             margin-top: 28px;
             padding-top: 24px;
-            border-top: 1px solid rgba(100, 116, 139, 0.2);
+            border-top: 1px solid #e5e7eb;
         }
 
         .logout-link a {
-            color: #64748b;
+            color: #6b7280;
             text-decoration: none;
             font-size: 0.8rem;
             font-weight: 500;
-            transition: all 0.2s ease;
+            transition: all 150ms ease;
             letter-spacing: -0.2px;
         }
 
         .logout-link a:hover {
-            color: #94a3b8;
+            color: #10b981;
+            text-decoration: underline;
+        }
+
+        /* Custom Dropdown Styles */
+        .custom-dropdown {
+            position: relative;
+            width: 100%;
+        }
+
+        .dropdown-trigger {
+            width: 100%;
+            padding: 10px 12px;
+            background-color: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            color: #111827;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 150ms ease;
+            height: 40px;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .dropdown-trigger:hover:not(:disabled) {
+            border-color: #10b981;
+            background-color: #ffffff;
+        }
+
+        .dropdown-trigger:focus {
+            outline: none;
+            border-color: #10b981;
+            background-color: #ffffff;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+        }
+
+        .dropdown-trigger:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background-color: #f3f4f6;
+        }
+
+        .dropdown-trigger-text {
+            flex: 1;
+            text-align: left;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .dropdown-chevron {
+            width: 16px;
+            height: 16px;
+            margin-left: 8px;
+            transition: transform 150ms ease;
+            flex-shrink: 0;
+        }
+
+        .dropdown-trigger.open .dropdown-chevron {
+            transform: rotate(180deg);
+        }
+
+        .dropdown-panel {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin-top: 4px;
+            z-index: 1000;
+            display: none;
+            max-height: 280px;
+            overflow: hidden;
+            flex-direction: column;
+        }
+
+        .dropdown-panel.open {
+            display: flex;
+        }
+
+        .dropdown-search {
+            padding: 10px 12px;
+            border-bottom: 1px solid #e5e7eb;
+            flex-shrink: 0;
+        }
+
+        .dropdown-search input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            background-color: #f9fafb;
+            color: #111827;
+            font-size: 0.875rem;
+            font-family: inherit;
+            transition: all 150ms ease;
+        }
+
+        .dropdown-search input:focus {
+            outline: none;
+            border-color: #10b981;
+            background-color: #ffffff;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        }
+
+        .dropdown-search input::placeholder {
+            color: #9ca3af;
+        }
+
+        .dropdown-options {
+            overflow-y: auto;
+            flex: 1;
+            padding: 4px 0;
+        }
+
+        .dropdown-option {
+            padding: 10px 12px;
+            color: #111827;
+            cursor: pointer;
+            transition: all 150ms ease;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .dropdown-option:hover {
+            background-color: #f0fdf4;
+            color: #059669;
+        }
+
+        .dropdown-option.selected {
+            background-color: #d1fae5;
+            color: #047857;
+            font-weight: 500;
+        }
+
+        .dropdown-empty {
+            padding: 20px 12px;
+            text-align: center;
+            color: #9ca3af;
+            font-size: 0.875rem;
         }
 
         @media (max-width: 768px) {
@@ -346,34 +492,76 @@
                 <!-- Location Section -->
                 <div class="form-section">
                     <label class="form-section-title">Location Details</label>
-                    <p style="color: #64748b; font-size: 0.8rem; margin: 0 0 16px 0; line-height: 1.4;">
+                    <p style="color: #9ca3af; font-size: 0.8rem; margin: 0 0 16px 0; line-height: 1.4;">
                         Select your State, District, and Taluka
                     </p>
 
                     <!-- State & District Grid -->
                     <div class="location-grid">
+                        <!-- State Dropdown -->
                         <div class="form-group">
                             <label class="form-label">State <span class="required-indicator">*</span></label>
-                            <select id="stateSelect" class="form-select" required>
-                                <option value="">Select State</option>
-                            </select>
+                            <div class="custom-dropdown" id="stateDropdown">
+                                <button type="button" class="dropdown-trigger" disabled>
+                                    <span class="dropdown-trigger-text">Select State</span>
+                                    <svg class="dropdown-chevron" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd"
+                                            d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                </button>
+                                <div class="dropdown-panel">
+                                    <div class="dropdown-search">
+                                        <input type="text" placeholder="Search state…" class="dropdown-search-input">
+                                    </div>
+                                    <div class="dropdown-options"></div>
+                                </div>
+                            </div>
                         </div>
 
+                        <!-- District Dropdown -->
                         <div class="form-group">
                             <label class="form-label">District <span class="required-indicator">*</span></label>
-                            <select id="districtSelect" class="form-select" required disabled>
-                                <option value="">Select District</option>
-                            </select>
+                            <div class="custom-dropdown" id="districtDropdown">
+                                <button type="button" class="dropdown-trigger" disabled>
+                                    <span class="dropdown-trigger-text">Select District</span>
+                                    <svg class="dropdown-chevron" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd"
+                                            d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                </button>
+                                <div class="dropdown-panel">
+                                    <div class="dropdown-search">
+                                        <input type="text" placeholder="Search district…" class="dropdown-search-input">
+                                    </div>
+                                    <div class="dropdown-options"></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
                     <!-- Taluka Full Width -->
                     <div class="location-grid full">
+                        <!-- Taluka Dropdown -->
                         <div class="form-group">
                             <label class="form-label">Taluka <span class="required-indicator">*</span></label>
-                            <select id="talukaSelect" class="form-select" required disabled>
-                                <option value="">Select Taluka</option>
-                            </select>
+                            <div class="custom-dropdown" id="talukaDropdown">
+                                <button type="button" class="dropdown-trigger" disabled>
+                                    <span class="dropdown-trigger-text">Select Taluka</span>
+                                    <svg class="dropdown-chevron" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd"
+                                            d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                </button>
+                                <div class="dropdown-panel">
+                                    <div class="dropdown-search">
+                                        <input type="text" placeholder="Search taluka…" class="dropdown-search-input">
+                                    </div>
+                                    <div class="dropdown-options"></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -395,18 +583,23 @@
     <script type="module">
         import { authService } from '../services/firebase.js';
         import { getDatabase, ref, set } from 'https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js';
+        import { CustomDropdown } from '../components/CustomDropdown.js';
 
         const form = document.getElementById('profileForm');
         const fullNameInput = document.getElementById('fullName');
-        const stateSelect = document.getElementById('stateSelect');
-        const districtSelect = document.getElementById('districtSelect');
-        const talukaSelect = document.getElementById('talukaSelect');
         const alertBox = document.getElementById('alertBox');
         const submitBtn = document.getElementById('submitBtn');
         const btnText = document.getElementById('btnText');
         const spinner = document.getElementById('spinner');
 
+        // Initialize custom dropdowns
+        let stateDropdown, districtDropdown, talukaDropdown;
         let indiaData = {};
+        let selectedLocation = {
+            state: null,
+            district: null,
+            taluka: null
+        };
 
         // Show Alert
         function showAlert(message, type = 'danger') {
@@ -433,60 +626,66 @@
                 const data = await response.json();
                 indiaData = data.India || {};
 
-                // Populate states
+                // Populate states in dropdown
                 const states = Object.keys(indiaData).sort();
-                states.forEach(state => {
-                    const option = document.createElement('option');
-                    option.value = state;
-                    option.textContent = state;
-                    stateSelect.appendChild(option);
-                });
+                stateDropdown.setOptions(states);
+                stateDropdown.setDisabled(false);
             } catch (error) {
                 console.error('Error loading location data:', error);
                 showAlert('Failed to load location data. Please refresh the page.');
             }
         }
 
-        // Update districts when state changes
-        stateSelect.addEventListener('change', () => {
-            const selectedState = stateSelect.value;
-            districtSelect.innerHTML = '<option value="">-- Select District --</option>';
-            talukaSelect.innerHTML = '<option value="">-- Select Taluka --</option>';
-            talukaSelect.disabled = true;
+        // Handle state selection
+        function onStateChange(selectedState) {
+            selectedLocation.state = selectedState;
+            selectedLocation.district = null;
+            selectedLocation.taluka = null;
+
+            districtDropdown.clear();
+            talukaDropdown.clear();
+            talukaDropdown.setDisabled(true);
 
             if (selectedState) {
                 const districts = Object.keys(indiaData[selectedState] || {}).sort();
-                districts.forEach(district => {
-                    const option = document.createElement('option');
-                    option.value = district;
-                    option.textContent = district;
-                    districtSelect.appendChild(option);
-                });
-                districtSelect.disabled = false;
+                districtDropdown.setOptions(districts);
+                districtDropdown.setDisabled(false);
             } else {
-                districtSelect.disabled = true;
+                districtDropdown.setDisabled(true);
             }
-        });
+        }
 
-        // Update talukas when district changes
-        districtSelect.addEventListener('change', () => {
-            const selectedState = stateSelect.value;
-            const selectedDistrict = districtSelect.value;
-            talukaSelect.innerHTML = '<option value="">-- Select Taluka --</option>';
+        // Handle district selection
+        function onDistrictChange(selectedDistrict) {
+            selectedLocation.district = selectedDistrict;
+            selectedLocation.taluka = null;
 
-            if (selectedDistrict) {
-                const talukas = Object.keys(indiaData[selectedState]?.[selectedDistrict] || {}).sort();
-                talukas.forEach(taluka => {
-                    const option = document.createElement('option');
-                    option.value = taluka;
-                    option.textContent = taluka;
-                    talukaSelect.appendChild(option);
-                });
-                talukaSelect.disabled = false;
+            talukaDropdown.clear();
+
+            if (selectedDistrict && selectedLocation.state) {
+                const talukas = Object.keys(indiaData[selectedLocation.state][selectedDistrict] || {}).sort();
+                talukaDropdown.setOptions(talukas);
+                talukaDropdown.setDisabled(false);
             } else {
-                talukaSelect.disabled = true;
+                talukaDropdown.setDisabled(true);
             }
-        });
+        }
+
+        // Handle taluka selection
+        function onTalukaChange(selectedTaluka) {
+            selectedLocation.taluka = selectedTaluka;
+        }
+
+        // Initialize dropdowns
+        function initializeDropdowns() {
+            stateDropdown = new CustomDropdown(document.getElementById('stateDropdown'));
+            districtDropdown = new CustomDropdown(document.getElementById('districtDropdown'));
+            talukaDropdown = new CustomDropdown(document.getElementById('talukaDropdown'));
+
+            stateDropdown.onChange = onStateChange;
+            districtDropdown.onChange = onDistrictChange;
+            talukaDropdown.onChange = onTalukaChange;
+        }
 
         // Pre-fill name if available
         authService.onAuthStateChanged((user) => {
@@ -498,6 +697,10 @@
             if (user.displayName) {
                 fullNameInput.value = user.displayName;
             }
+
+            // Initialize dropdowns after auth check
+            initializeDropdowns();
+            loadLocationData();
         });
 
         // Form submission
@@ -505,9 +708,9 @@
             e.preventDefault();
 
             const fullName = fullNameInput.value.trim();
-            const state = stateSelect.value;
-            const district = districtSelect.value;
-            const taluka = talukaSelect.value;
+            const state = selectedLocation.state;
+            const district = selectedLocation.district;
+            const taluka = selectedLocation.taluka;
 
             // Validation
             if (!fullName) {
