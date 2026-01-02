@@ -67,6 +67,7 @@ async function initializeUserDatabase(userId, email, displayName, location) {
       await set(ref(db, `users/${userId}/profile`), {
         email: email,
         displayName: displayName || "",
+        photoURL: null,
         currentCrop: null,
         cropMinPH: null,
         cropMaxPH: null,
@@ -112,7 +113,12 @@ async function initializeUserDatabase(userId, email, displayName, location) {
       await set(ref(db, `users/${userId}/settings`), {
         theme: "light",
         autoPump: true,
-        notifications: true,
+        preferredCrop: "",
+        notifications: {
+          phAlerts: true,
+          systemUpdates: true,
+          weeklySummary: true,
+        },
         updatedAt: now,
       });
       console.log("✅ Settings created successfully");
@@ -328,12 +334,14 @@ export const authService = {
 export const phService = {
   /**
    * Add pH reading
+   * Uses numeric timestamps (Date.now()) for reliable filtering and comparison
+   * This ensures multi-day filtering (24h, 7d, 30d) works correctly
    */
   async addReading(userId, phValue) {
     try {
       const reading = {
         value: phValue,
-        timestamp: new Date().toISOString(),
+        timestamp: Date.now(), // Numeric timestamp for reliable filtering
       };
       // Store in user-scoped path for complete data isolation
       const ref_path = ref(db, `users/${userId}/phReadings`);
@@ -407,6 +415,7 @@ export const phService = {
 export const pumpService = {
   /**
    * Log pump activity
+   * Uses numeric timestamps (Date.now()) for consistent filtering across the app
    */
   async logActivity(userId, pumpType, solution, concentration) {
     try {
@@ -414,7 +423,7 @@ export const pumpService = {
         type: pumpType, // 'basic' or 'acidic'
         solution: solution,
         concentration: concentration,
-        timestamp: new Date().toISOString(),
+        timestamp: Date.now(), // Numeric timestamp for reliable operations
       };
       // Store in user-scoped path for complete data isolation
       const ref_path = ref(db, `users/${userId}/pumpLogs`);

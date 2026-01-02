@@ -15,6 +15,8 @@ import { HeaderComponent } from "../components/header.js";
 import { StatusIndicatorComponent } from "../components/status-indicator.js";
 import { PumpLogComponent } from "../components/pump-log.js";
 import { CropCardsComponent } from "../components/crop-cards.js";
+import { ChatbotComponent } from "../components/chatbot.js";
+import { CropRecommendationEngine } from "../services/crop-recommendations.js";
 import {
   getDatabase,
   ref,
@@ -38,6 +40,7 @@ const appState = {
   },
   optimalPHMin: 6.5,
   optimalPHMax: 7.5,
+  currentTimeRange: "24h", // Track current time filter
   chart: null,
 };
 
@@ -764,6 +767,9 @@ async function loadUserProfile() {
       );
       if (crop) {
         appState.currentCrop = crop;
+        // Update optimal pH to match the crop's range
+        appState.optimalPHMin = crop.minPH;
+        appState.optimalPHMax = crop.maxPH;
       }
     }
   }
@@ -803,9 +809,29 @@ function initializeComponents() {
   pumpLogComponent = new PumpLogComponent("pumpLogComponent");
   pumpLogComponent.render([]);
 
-  // Crop Cards Component
-  cropCardsComponent = new CropCardsComponent("cropCardsComponent");
-  cropCardsComponent.render(CROPS_DATABASE, appState.currentCrop);
+  // Crop Cards Component with Recommendations
+  const recommendationEngine = new CropRecommendationEngine();
+  cropCardsComponent = new CropCardsComponent(
+    "cropCardsComponent",
+    recommendationEngine
+  );
+
+  // Build user profile for recommendations
+  const userProfileForRecommendations = {
+    farmLocation: appState.profile?.farmLocation || "",
+    // Add other relevant profile data as needed
+  };
+
+  cropCardsComponent.render(
+    CROPS_DATABASE,
+    appState.currentCrop,
+    appState.profile?.cropLocked || false,
+    userProfileForRecommendations
+  );
+
+  // Chatbot Component
+  const chatbot = new ChatbotComponent("chatbotContainer");
+  chatbot.init();
 
   // Initialize pH Chart
   initializePHChart();
@@ -888,7 +914,9 @@ function initializePHChart() {
 // ==========================================
 async function loadPhReadings() {
   console.log("Loading pH readings for user:", appState.user.uid);
-  const result = await phService.getReadings(appState.user.uid, 500);
+  // Fetch more readings to support 30-day filter (assuming ~1 reading per minute = ~43,200 per 30 days)
+  // Limiting to 2000 for performance while ensuring 7d/30d have adequate data
+  const result = await phService.getReadings(appState.user.uid, 2000);
 
   if (result.success) {
     appState.phReadings = result.readings;
@@ -910,7 +938,8 @@ async function loadPhReadings() {
       updatePHDisplay(parseFloat(latest.value));
     }
 
-    updatePHChart("24h");
+    // Update chart with the currently selected time range
+    updatePHChart(appState.currentTimeRange);
     updatePHStats();
   });
 }
@@ -979,42 +1008,126 @@ function updateOptimalPHDisplay() {
 // ==========================================
 // Update pH Chart
 // ==========================================
+// Update pH Chart
+// ==========================================
 function updatePHChart(timeRange = "24h") {
   if (!appState.chart) return;
 
-  const now = new Date();
+  // Use numeric timestamps (milliseconds) for reliable comparison
+  const now = Date.now();
   let cutoffTime;
 
   switch (timeRange) {
     case "24h":
-      cutoffTime = new Date(now - 24 * 60 * 60 * 1000);
+      cutoffTime = now - 24 * 60 * 60 * 1000;
       break;
     case "7d":
-      cutoffTime = new Date(now - 7 * 24 * 60 * 60 * 1000);
+      cutoffTime = now - 7 * 24 * 60 * 60 * 1000;
       break;
     case "30d":
-      cutoffTime = new Date(now - 30 * 24 * 60 * 60 * 1000);
+      cutoffTime = now - 30 * 24 * 60 * 60 * 1000;
       break;
     default:
-      cutoffTime = new Date(now - 24 * 60 * 60 * 1000);
+      cutoffTime = now - 24 * 60 * 60 * 1000;
   }
 
-  // Filter readings by time range
+  // Filter readings by time range using numeric timestamp comparison
+  // This ensures ISO string parsing issues don't prevent multi-day filtering
   const filteredReadings = appState.phReadings.filter((reading) => {
-    const readingTime = new Date(reading.timestamp);
-    return readingTime > cutoffTime;
+    const readingTimestamp =
+      typeof reading.timestamp === "number"
+        ? reading.timestamp
+        : new Date(reading.timestamp).getTime(); // Fallback for legacy data
+    return readingTimestamp > cutoffTime;
   });
 
-  // Update chart
-  appState.chart.data.labels = filteredReadings.map((reading) => {
-    const date = new Date(reading.timestamp);
-    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-  });
+  // Generate smart labels based on time range to avoid overcrowding
+  let labels;
+  if (timeRange === "24h") {
+    // For 24h: show time labels every 2-4 entries (hourly approximation)
+    const step = Math.max(1, Math.floor(filteredReadings.length / 6));
+    labels = filteredReadings.map((reading, index) => {
+      if (index % step === 0) {
+        const timestamp =
+          typeof reading.timestamp === "number"
+            ? reading.timestamp
+            : new Date(reading.timestamp).getTime();
+        const date = new Date(timestamp);
+        return date.toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+      }
+      return "";
+    });
+  } else if (timeRange === "7d") {
+    // For 7d: show daily labels with dates (format: "DD Mon") so previous days are visible
+    const step = Math.max(1, Math.floor(filteredReadings.length / 7));
+    labels = filteredReadings.map((reading, index) => {
+      if (index % step === 0) {
+        const timestamp =
+          typeof reading.timestamp === "number"
+            ? reading.timestamp
+            : new Date(reading.timestamp).getTime();
+        const date = new Date(timestamp);
+        return date.toLocaleDateString([], { day: "2-digit", month: "short" });
+      }
+      return "";
+    });
+  } else {
+    // For 30d: show weekly labels with dates (format: "DD Mon")
+    const step = Math.max(1, Math.floor(filteredReadings.length / 5));
+    labels = filteredReadings.map((reading, index) => {
+      if (index % step === 0) {
+        const timestamp =
+          typeof reading.timestamp === "number"
+            ? reading.timestamp
+            : new Date(reading.timestamp).getTime();
+        const date = new Date(timestamp);
+        return date.toLocaleDateString([], { day: "2-digit", month: "short" });
+      }
+      return "";
+    });
+  }
 
+  // Update chart with new labels and data
+  appState.chart.data.labels = labels;
   appState.chart.data.datasets[0].data = filteredReadings.map(
     (reading) => reading.value
   );
   appState.chart.update();
+
+  // Update the pH Range label text to reflect current filter
+  updatePHRangeLabel(timeRange, filteredReadings);
+}
+
+// ==========================================
+// Update pH Range Label Based on Time Filter
+// ==========================================
+function updatePHRangeLabel(timeRange, filteredReadings = null) {
+  // Use specific ID to target only the pH Range label, not Average pH
+  const phRangeLabelEl = document.getElementById("phRangeLabel");
+  if (!phRangeLabelEl) return;
+
+  let timeLabel = "24h";
+  switch (timeRange) {
+    case "7d":
+      timeLabel = "7 Days";
+      break;
+    case "30d":
+      timeLabel = "30 Days";
+      break;
+  }
+  phRangeLabelEl.textContent = `pH Range (${timeLabel})`;
+
+  // Update pH range values if filtered readings provided
+  if (filteredReadings && filteredReadings.length > 0) {
+    const phRangeEl = document.getElementById("phRange");
+    const values = filteredReadings.map((r) => r.value);
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+    phRangeEl.textContent = `${min.toFixed(1)} - ${max.toFixed(1)}`;
+  }
 }
 
 // ==========================================
@@ -1027,13 +1140,13 @@ function updatePHStats() {
   const acidicCountEl = document.getElementById("acidicPumpCount");
 
   if (appState.phReadings.length > 0) {
-    // Average pH
+    // Average pH (calculated from all loaded readings for consistency)
     const avg =
       appState.phReadings.reduce((sum, reading) => sum + reading.value, 0) /
       appState.phReadings.length;
     avgPhEl.textContent = avg.toFixed(2);
 
-    // pH Range
+    // pH Range (updated via updatePHRangeLabel when chart updates)
     const values = appState.phReadings.map((r) => r.value);
     const min = Math.min(...values);
     const max = Math.max(...values);
@@ -1279,14 +1392,19 @@ function setupEventListeners() {
     });
   }
 
-  // Time filter buttons
+  // Time filter buttons with improved visual feedback
   document.querySelectorAll(".time-filter-btn").forEach((btn) => {
     btn.addEventListener("click", (e) => {
+      // Remove active class from all buttons
       document
         .querySelectorAll(".time-filter-btn")
         .forEach((b) => b.classList.remove("active"));
+      // Add active class to clicked button for clear visual feedback
       e.target.classList.add("active");
-      updatePHChart(e.target.dataset.range);
+      const timeRange = e.target.dataset.range;
+      appState.currentTimeRange = timeRange; // Save selected time range persistently
+      // Update chart with new time range, smart labels, and dynamic pH range label
+      updatePHChart(timeRange);
     });
   });
 

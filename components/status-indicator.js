@@ -41,8 +41,13 @@ export class StatusIndicatorComponent {
             <p class="text-secondary">${
               arduinoConnected ? "Live data stream" : "Using simulation data"
             }</p>
-            <button id="connectArduinoBtn" class="btn btn-secondary" style="margin-top: var(--space-2); width: 100%; font-size: 0.9rem;">
-              ${arduinoConnected ? "🔌 Disconnect" : "🔌 Connect Arduino"}
+            <button id="connectArduinoBtn" class="btn btn-arduino ${
+              arduinoConnected
+                ? "btn-arduino-connected"
+                : "btn-arduino-disconnected"
+            }" style="margin-top: var(--space-2); width: 100%; font-size: 0.9rem; font-weight: 600;">
+              <span class="arduino-icon">${arduinoConnected ? "✓" : "⚡"}</span>
+              ${arduinoConnected ? "Disconnect Arduino" : "Connect Arduino"}
             </button>
           </div>
         </div>

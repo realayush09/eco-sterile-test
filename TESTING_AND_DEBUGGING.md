@@ -301,29 +301,38 @@ console.log("Init result:", initResult);
 2. Look at console for specific error
 3. Check Database Rules
 
-**Common Cause:**
+**Current Firebase Security Rules:**
 
-```
-Firebase Rules too restrictive:
+```json
 {
   "rules": {
-    "users": {
-      ".write": "auth.uid != null",
-      ".read": "auth.uid == $uid"
-    }
-  }
-}
-```
+    ".read": false,
+    ".write": false,
 
-Should allow:
+    "admins": {
+      "$adminUid": {
+        ".read": "auth != null && auth.uid === $adminUid",
+        ".write": false
+      }
+    },
 
-```
-{
-  "rules": {
     "users": {
       "$uid": {
-        ".write": "auth.uid == $uid",
-        ".read": "auth.uid == $uid"
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid",
+
+        "profile": {
+          ".read": "auth != null && (
+            auth.uid === $uid ||
+            root.child('admins').child(auth.uid).val() === true
+          )",
+          ".write": "auth != null && auth.uid === $uid"
+        },
+
+        "settings": {
+          ".read": "auth != null && auth.uid === $uid",
+          ".write": "auth != null && auth.uid === $uid"
+        }
       }
     }
   }

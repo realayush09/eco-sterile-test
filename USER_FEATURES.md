@@ -133,17 +133,43 @@ Your profile stores:
 
 Updated rules ensure:
 
-- ✅ Each user can only read their own data
-- ✅ Each user can only write to their own paths
-- ✅ Shared data (like weather) is accessible to all authenticated users
+- ✅ Default deny all access (deny by default)
+- ✅ Admin users can read their own admin data only
+- ✅ Each user can only read/write their own profile and settings
+- ✅ Admins can read user profiles (for monitoring)
+- ✅ Secure profile and settings subsections with proper auth checks
 
 ```json
 {
   "rules": {
+    ".read": false,
+    ".write": false,
+
+    "admins": {
+      "$adminUid": {
+        ".read": "auth != null && auth.uid === $adminUid",
+        ".write": false
+      }
+    },
+
     "users": {
       "$uid": {
-        ".read": "auth.uid === $uid",
-        ".write": "auth.uid === $uid"
+        ".read": "auth != null && auth.uid === $uid",
+
+        ".write": "auth != null && auth.uid === $uid",
+
+        "profile": {
+          ".read": "auth != null && (
+            auth.uid === $uid ||
+            root.child('admins').child(auth.uid).val() === true
+          )",
+          ".write": "auth != null && auth.uid === $uid"
+        },
+
+        "settings": {
+          ".read": "auth != null && auth.uid === $uid",
+          ".write": "auth != null && auth.uid === $uid"
+        }
       }
     }
   }

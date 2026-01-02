@@ -81,6 +81,24 @@ export class HeaderComponent {
       }
     });
 
+    // Navigation links
+    const profileLink = document.getElementById("profileLink");
+    const settingsLink = document.getElementById("settingsLink");
+
+    if (profileLink) {
+      profileLink.addEventListener("click", (e) => {
+        e.preventDefault();
+        window.location.href = "./profile.html";
+      });
+    }
+
+    if (settingsLink) {
+      settingsLink.addEventListener("click", (e) => {
+        e.preventDefault();
+        window.location.href = "./settings.html";
+      });
+    }
+
     // Logout button
     document.getElementById("logoutBtn").addEventListener("click", (e) => {
       e.preventDefault();

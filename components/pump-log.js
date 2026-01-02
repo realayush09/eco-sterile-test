@@ -25,8 +25,8 @@ export class PumpLogComponent {
       return;
     }
 
-    // Show only last 10 entries
-    const recentLogs = logs.slice(-10).reverse();
+    // Show only last 10 entries (already in descending order from Firebase)
+    const recentLogs = logs.slice(0, 10);
 
     const logHTML = recentLogs
       .map((log, index) => {
