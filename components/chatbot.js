@@ -19,6 +19,8 @@ export class ChatbotComponent {
     this.messages = [];
     this.container = null;
     this.appState = null; // Will be injected by dashboard
+    this.loggingService = null; // Will be injected with Firebase logging
+    this.userId = null; // Will be set when user is authenticated
 
     // Intent patterns for intelligent routing
     this.intentPatterns = {
@@ -318,7 +320,7 @@ export class ChatbotComponent {
         </div>
         <div class="chatbot-message-time">${msg.time}</div>
       </div>
-    `
+    `,
       )
       .join("");
 
@@ -433,6 +435,16 @@ export class ChatbotComponent {
     setTimeout(() => {
       const response = this.getBotResponse(message);
       this.addBotMessage(response);
+
+      // Log interaction to Firebase (if logging service is available)
+      if (this.loggingService && this.userId) {
+        this.loggingService.logInteraction(message, response).catch((err) => {
+          console.warn(
+            "Failed to log chatbot interaction (non-critical):",
+            err,
+          );
+        });
+      }
     }, 500);
   }
 
@@ -506,7 +518,7 @@ export class ChatbotComponent {
     // Try to match against defined intent patterns
     for (const [intentType, pattern] of Object.entries(this.intentPatterns)) {
       const keywordMatches = pattern.keywords.filter((kw) =>
-        message.includes(kw.toLowerCase())
+        message.includes(kw.toLowerCase()),
       );
 
       if (keywordMatches.length > 0) {
@@ -631,7 +643,7 @@ export class ChatbotComponent {
 
       if (range > 0.5) {
         response += `📊 pH Range in last readings: ${minVal.toFixed(
-          1
+          1,
         )} - ${maxVal.toFixed(1)} (variation: ${range.toFixed(2)})\n\n`;
       }
     }
@@ -666,20 +678,20 @@ export class ChatbotComponent {
       const max = optimalPHMax || 7.5;
 
       response += `Current: ${currentPH.toFixed(
-        1
+        1,
       )}, Optimal: ${min} - ${max}\n\n`;
 
       if (currentPH < min) {
         response += `🔴 TOO ACIDIC:\n`;
         response += `- pH ${currentPH.toFixed(
-          1
+          1,
         )} is below your crop's optimal range\n`;
         response += `- Activate the Basic pump to increase pH\n`;
         response += `- Target: increase pH to ${min}\n`;
       } else if (currentPH > max) {
         response += `🔵 TOO BASIC:\n`;
         response += `- pH ${currentPH.toFixed(
-          1
+          1,
         )} is above your crop's optimal range\n`;
         response += `- Activate the Acidic pump to decrease pH\n`;
         response += `- Target: decrease pH to ${max}\n`;
@@ -1192,6 +1204,16 @@ export class ChatbotComponent {
   setAppState(appState) {
     this.appState = appState;
     console.log("✅ Chatbot now has context awareness - connected to appState");
+  }
+
+  /**
+   * Set up Firebase logging service
+   * Call this after user authentication
+   */
+  setLoggingService(loggingService, userId) {
+    this.loggingService = loggingService;
+    this.userId = userId;
+    console.log("✅ Chatbot logging service initialized for user:", userId);
   }
 
   /**

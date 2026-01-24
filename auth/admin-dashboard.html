@@ -372,6 +372,11 @@
                 <div class="stat-number" id="locationCount">--</div>
                 <div class="stat-label">Locations</div>
             </div>
+            <div class="stat-card">
+                <div class="stat-icon">💬</div>
+                <div class="stat-number" id="chatbotCount">--</div>
+                <div class="stat-label">Chatbot Logs</div>
+            </div>
         </div>
 
         <!-- Data Filters Section -->
@@ -386,6 +391,7 @@
                         <option value="phReadings">pH Readings Only</option>
                         <option value="pumpLogs">Pump Logs Only</option>
                         <option value="locations">Locations Only</option>
+                        <option value="chatbotLogs">Chatbot Logs Only</option>
                     </select>
                 </div>
                 <div class="filter-item">
@@ -406,6 +412,14 @@
         <div>
             <div class="section-title">📥 Export Data - All Formats</div>
             <div class="export-grid">
+                <!-- Chatbot Data Export -->
+                <div class="export-card">
+                    <div class="export-icon">💬</div>
+                    <div class="export-format">Chatbot Interactions</div>
+                    <div class="export-desc">All chatbot Q&A logs in JSON format</div>
+                    <button class="export-btn" data-format="chatbot-json">Export Chatbot Data</button>
+                </div>
+
                 <!-- JSON Complete -->
                 <div class="export-card">
                     <div class="export-icon">📋</div>
@@ -519,7 +533,8 @@
             users: {},
             phReadings: {},
             pumpLogs: {},
-            locations: {}
+            locations: {},
+            chatbotLogs: {}
         };
 
         // DOM Elements
@@ -616,6 +631,20 @@
                     allData.users = {};
                 }
 
+                // Load chatbot logs
+                try {
+                    const chatbotSnap = await get(ref(db, "chatbotLogs"));
+                    if (chatbotSnap.exists()) {
+                        allData.chatbotLogs = chatbotSnap.val();
+                    } else {
+                        console.log("ℹ️ No chatbot logs found");
+                        allData.chatbotLogs = {};
+                    }
+                } catch (err) {
+                    console.warn("⚠️ Could not load chatbot logs:", err);
+                    allData.chatbotLogs = {};
+                }
+
                 updateStats();
                 updatePreview();
 
@@ -646,10 +675,21 @@
             const pumpLogsCount = Object.keys(allData.pumpLogs).length;
             const locationsCount = Object.keys(allData.locations).length;
 
+            // Count chatbot logs
+            let chatbotCount = 0;
+            Object.values(allData.chatbotLogs).forEach(userLogs => {
+                if (typeof userLogs === "object") {
+                    chatbotCount += Object.keys(userLogs).length;
+                }
+            });
+
             userCountEl.textContent = usersCount;
             readingCountEl.textContent = readingsCount;
             pumpCountEl.textContent = pumpLogsCount;
             locationCountEl.textContent = locationsCount;
+            // Update chatbot count if element exists
+            const chatbotCountEl = document.getElementById("chatbotCount");
+            if (chatbotCountEl) chatbotCountEl.textContent = chatbotCount;
         }
 
         // Update data preview
@@ -668,6 +708,9 @@
             }
             if (dataTypeFilter === "all" || dataTypeFilter === "pumpLogs") {
                 previewData.pumpLogs = allData.pumpLogs;
+            }
+            if (dataTypeFilter === "all" || dataTypeFilter === "chatbotLogs") {
+                previewData.chatbotLogs = allData.chatbotLogs;
             }
 
             const preview = JSON.stringify(previewData, null, 2).substring(0, 1000);
@@ -741,6 +784,10 @@
             const timestamp = new Date().toISOString().replace(/[:.]/g, "-").substring(0, 19);
 
             switch (format) {
+                // Chatbot export
+                case "chatbot-json":
+                    exportChatbotJSON(allData.chatbotLogs, timestamp);
+                    break;
                 // New comprehensive formats
                 case "json-complete":
                     exportJSONComplete(allData.users, timestamp);
@@ -770,6 +817,30 @@
                 default:
                     throw new Error(`Unknown export format: ${format}`);
             }
+        }
+
+        // Export Chatbot Logs as JSON
+        function exportChatbotJSON(chatbotLogs, timestamp) {
+            const formattedLogs = {};
+            let totalInteractions = 0;
+
+            Object.entries(chatbotLogs).forEach(([userId, userLogs]) => {
+                if (typeof userLogs === "object") {
+                    formattedLogs[userId] = Object.values(userLogs);
+                    totalInteractions += Object.keys(userLogs).length;
+                }
+            });
+
+            const exportData = {
+                exportedAt: new Date().toISOString(),
+                totalUsers: Object.keys(chatbotLogs).length,
+                totalInteractions: totalInteractions,
+                data: formattedLogs
+            };
+
+            const content = JSON.stringify(exportData, null, 2);
+            const blob = new Blob([content], { type: "application/json" });
+            downloadFile(blob, `ecosterile-chatbot-logs-${timestamp}.json`);
         }
 
         // NEW: Export Complete JSON (All data nested)

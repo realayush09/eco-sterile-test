@@ -17,6 +17,8 @@ import { StatusIndicatorComponent } from "../components/status-indicator.js";
 import { PumpLogComponent } from "../components/pump-log.js";
 import { CropCardsComponent } from "../components/crop-cards.js";
 import { ChatbotComponent } from "../components/chatbot.js";
+import { ContactModalComponent } from "../components/contact-modal.js";
+import { ChatbotLoggingService } from "../services/chatbot-logging.js";
 import { CropRecommendationEngine } from "../services/crop-recommendations.js";
 
 import {
@@ -47,6 +49,7 @@ const appState = {
   chartUpdateTimer: null, // Debounce timer for chart updates
   dataIsContinuous: true, // Track if pH data is continuous
   lastReadingTime: null, // Track last reading for UI display
+  contactModal: null, // Contact modal component
   // Simulation state for chatbot context awareness
   simulationState: {
     enabled: false,
@@ -698,7 +701,7 @@ async function initializeDashboard() {
           if (!hasProfile || !hasLocation) {
             // Profile incomplete, redirect to completion page
             console.warn(
-              "⚠️ Profile incomplete. Redirecting to complete-profile.html"
+              "⚠️ Profile incomplete. Redirecting to complete-profile.html",
             );
             window.location.href = "../auth/complete-profile.html";
             return;
@@ -710,6 +713,10 @@ async function initializeDashboard() {
 
         appState.user = user;
         await loadUserProfile();
+
+        // Initialize and show contact modal on sign in
+        await initializeContactModal();
+
         initializeComponents();
         setupEventListeners();
         startMonitoring();
@@ -741,7 +748,7 @@ async function loadUserProfile() {
     // Ensure location node exists (migration for legacy accounts)
     console.log("🔄 Checking if location node exists...");
     const ensureResult = await userService.ensureLocationExists(
-      appState.user.uid
+      appState.user.uid,
     );
     if (ensureResult.created) {
       console.log("✨ Location node was created for legacy account");
@@ -799,13 +806,13 @@ async function loadUserProfile() {
       "🌾 Crop pH range set:",
       appState.optimalPHMin,
       "-",
-      appState.optimalPHMax
+      appState.optimalPHMax,
     );
 
     // Set current crop if saved
     if (result.profile.currentCrop) {
       const crop = CROPS_DATABASE.find(
-        (c) => c.value === result.profile.currentCrop
+        (c) => c.value === result.profile.currentCrop,
       );
       if (crop) {
         appState.currentCrop = crop;
@@ -853,11 +860,11 @@ async function loadPhReadings() {
     appState.phReadings = result.readings;
     console.log(
       "✅ pH readings loaded successfully:",
-      appState.phReadings.length
+      appState.phReadings.length,
     );
     if (appState.phReadings.length > 0) {
       const latestValue = parseFloat(
-        appState.phReadings[appState.phReadings.length - 1].value
+        appState.phReadings[appState.phReadings.length - 1].value,
       );
       console.log("📈 Latest pH value from batch:", latestValue);
       simulationState.currentPH = latestValue;
@@ -870,7 +877,7 @@ async function loadPhReadings() {
     console.error("❌ Failed to load pH readings:", result.error);
     if (result.error && result.error.includes("Permission denied")) {
       alert(
-        "⚠️ Permission Denied: You don't have access to pH readings.\n\nCheck Firebase rules or ensure your user has proper permissions."
+        "⚠️ Permission Denied: You don't have access to pH readings.\n\nCheck Firebase rules or ensure your user has proper permissions.",
       );
     }
   }
@@ -896,7 +903,7 @@ async function loadPhReadings() {
       import("../services/logger.js").then(({ logger }) => {
         logger.debug(
           "🔥 FIREBASE LISTENER FIRED - Received readings:",
-          readings.length
+          readings.length,
         );
       });
 
@@ -912,7 +919,7 @@ async function loadPhReadings() {
 
       import("../services/logger.js").then(({ logger }) => {
         logger.debug(
-          `🔥 Latest in snapshot: pH=${latestValue}, timestamp=${latestTimestamp}`
+          `🔥 Latest in snapshot: pH=${latestValue}, timestamp=${latestTimestamp}`,
         );
       });
 
@@ -920,7 +927,7 @@ async function loadPhReadings() {
       if (latestTimestamp !== lastDisplayedTimestamp) {
         import("../services/logger.js").then(({ logger }) => {
           logger.debug(
-            `✨ BRAND NEW reading detected! Was: ${lastDisplayedTimestamp}, Now: ${latestTimestamp}`
+            `✨ BRAND NEW reading detected! Was: ${lastDisplayedTimestamp}, Now: ${latestTimestamp}`,
           );
         });
         lastDisplayedTimestamp = latestTimestamp;
@@ -947,10 +954,10 @@ async function loadPhReadings() {
         updatePHStats();
       } else {
         console.log(
-          `ℹ️ Same timestamp as last display (${latestTimestamp}) - skipping UI update`
+          `ℹ️ Same timestamp as last display (${latestTimestamp}) - skipping UI update`,
         );
       }
-    }
+    },
   );
 
   console.log("✅ Real-time listener attached successfully");
@@ -971,7 +978,7 @@ function startDataStalenessMonitor() {
 
     if (timeSinceLastData > TEN_SECONDS && !simulationState.enabled) {
       console.warn(
-        "⚠️ No real pH data for 10 seconds - SWITCHING TO SIMULATION MODE"
+        "⚠️ No real pH data for 10 seconds - SWITCHING TO SIMULATION MODE",
       );
       simulationState.enabled = true;
       startSimulationMode();
@@ -1024,7 +1031,7 @@ function startSimulationMode() {
   }, 2000); // Every 2 seconds
 
   console.log(
-    "🎬 Simulation started - writing pH values to DB every 2 seconds"
+    "🎬 Simulation started - writing pH values to DB every 2 seconds",
   );
 }
 
@@ -1072,13 +1079,13 @@ async function loadPumpLogs() {
         console.log(
           `🔥 Pump listener fired (#${listenerCallCount}):`,
           logs?.length || 0,
-          "logs"
+          "logs",
         );
 
         appState.pumpLogs = logs || [];
         console.log(
           "✅ Pump logs updated in real-time:",
-          appState.pumpLogs.length
+          appState.pumpLogs.length,
         );
 
         // Debug: show latest log
@@ -1086,8 +1093,8 @@ async function loadPumpLogs() {
           const latest = appState.pumpLogs[appState.pumpLogs.length - 1];
           console.log(
             `   Latest: ${latest.type} @ ${new Date(
-              latest.timestamp
-            ).toLocaleTimeString()}`
+              latest.timestamp,
+            ).toLocaleTimeString()}`,
           );
         }
 
@@ -1146,6 +1153,23 @@ function updateOptimalPHDisplay() {
 }
 
 // ==========================================
+// Initialize Contact Modal
+// ==========================================
+async function initializeContactModal() {
+  try {
+    console.log("📧 Initializing contact modal...");
+    appState.contactModal = new ContactModalComponent("contactModal");
+    await appState.contactModal.init();
+
+    // Show modal on sign in
+    appState.contactModal.open();
+    console.log("✅ Contact modal initialized and displayed");
+  } catch (error) {
+    console.error("❌ Failed to initialize contact modal:", error);
+  }
+}
+
+// ==========================================
 // Initialize Components
 // ==========================================
 function initializeComponents() {
@@ -1181,7 +1205,7 @@ function initializeComponents() {
     const recommendationEngine = new CropRecommendationEngine();
     cropCardsComponent = new CropCardsComponent(
       "cropCardsComponent",
-      recommendationEngine
+      recommendationEngine,
     );
 
     // Build user profile for recommendations
@@ -1194,7 +1218,7 @@ function initializeComponents() {
       CROPS_DATABASE,
       appState.currentCrop,
       appState.profile?.cropLocked || false,
-      userProfileForRecommendations
+      userProfileForRecommendations,
     );
     console.log("✅ Crop cards component initialized");
   } catch (e) {
@@ -1208,6 +1232,21 @@ function initializeComponents() {
     // CRITICAL: Inject appState for context-aware responses
     chatbot.setAppState(appState);
     console.log("✅ Chatbot component initialized with context awareness");
+
+    // Initialize Chatbot Logging Service
+    try {
+      const db = getDatabase();
+      const userId = appState.user.uid;
+      const loggingService = new ChatbotLoggingService(db, userId);
+      chatbot.setLoggingService(loggingService, userId);
+      console.log("✅ Chatbot logging service initialized for user:", userId);
+    } catch (loggingError) {
+      console.warn(
+        "⚠️ Chatbot logging not available (non-critical):",
+        loggingError.message,
+      );
+      // Don't break the chatbot if logging fails
+    }
   } catch (e) {
     console.error("❌ Chatbot component error:", e.message);
   }
@@ -1350,7 +1389,7 @@ function updatePHChart(timeRange = "24h") {
       time: new Date(
         typeof reading.timestamp === "number"
           ? reading.timestamp
-          : reading.timestamp
+          : reading.timestamp,
       ),
       value: reading.value,
     }))
@@ -1358,7 +1397,7 @@ function updatePHChart(timeRange = "24h") {
 
   import("../services/logger.js").then(({ logger }) => {
     logger.debug(
-      `⏱ updatePHChart: filteredReadings=${filteredReadings.length}`
+      `⏱ updatePHChart: filteredReadings=${filteredReadings.length}`,
     );
   });
   if (filteredReadings.length > 0) {
@@ -1367,7 +1406,7 @@ function updatePHChart(timeRange = "24h") {
       logger.debug(
         `⏱ updatePHChart: last value=${
           last.value
-        } time=${last.time.toLocaleTimeString()}`
+        } time=${last.time.toLocaleTimeString()}`,
       );
     });
   }
@@ -1379,10 +1418,10 @@ function updatePHChart(timeRange = "24h") {
   }
 
   appState.chart.data.labels = filteredReadings.map((item) =>
-    item.time.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+    item.time.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
   );
   appState.chart.data.datasets[0].data = filteredReadings.map(
-    (item) => item.value
+    (item) => item.value,
   );
   appState.chart.update();
 
@@ -1427,10 +1466,10 @@ function updatePHStats() {
 
   // Pump counts
   const basicCount = appState.pumpLogs.filter(
-    (log) => log.type === "basic"
+    (log) => log.type === "basic",
   ).length;
   const acidicCount = appState.pumpLogs.filter(
-    (log) => log.type === "acidic"
+    (log) => log.type === "acidic",
   ).length;
 
   basicCountEl.textContent = basicCount;
@@ -1491,7 +1530,7 @@ window.forcePhRefresh = forcePhRefresh;
 async function addPHReading(pH) {
   import("../services/logger.js").then(({ logger }) => {
     logger.debug(
-      `📝 Writing pH ${pH} to Firebase at ${new Date().toLocaleTimeString()}`
+      `📝 Writing pH ${pH} to Firebase at ${new Date().toLocaleTimeString()}`,
     );
   });
   // Guard: ensure we have a logged-in user
@@ -1550,7 +1589,7 @@ async function addPHReading(pH) {
     } else {
       console.error(
         "❌ Failed to add pH reading - service returned failure:",
-        result
+        result,
       );
       showNotification("Failed to write pH (check console).", "error");
       return { success: false, error: result?.error || "unknown" };
@@ -1577,7 +1616,7 @@ async function logPumpActivity(pumpType, concentration) {
   // Guard: ensure we have a logged-in user
   if (!appState.user || !appState.user.uid) {
     console.error(
-      "❌ Cannot log pump activity: user not authenticated or uid missing"
+      "❌ Cannot log pump activity: user not authenticated or uid missing",
     );
     showNotification("Cannot log pump activity: not authenticated", "error");
     return { success: false, error: "no-user" };
@@ -1595,7 +1634,7 @@ async function logPumpActivity(pumpType, concentration) {
       appState.user.uid,
       pumpType,
       chemical,
-      concentration
+      concentration,
     );
 
     console.log("← pumpService.logActivity result:", result);
@@ -1620,7 +1659,7 @@ async function logPumpActivity(pumpType, concentration) {
       appState.pumpLogs = appState.pumpLogs || [];
       appState.pumpLogs.push(entry);
       appState.pumpLogs.sort(
-        (a, b) => new Date(a.timestamp) - new Date(b.timestamp)
+        (a, b) => new Date(a.timestamp) - new Date(b.timestamp),
       );
 
       if (pumpLogComponent && typeof pumpLogComponent.render === "function") {
@@ -1635,7 +1674,7 @@ async function logPumpActivity(pumpType, concentration) {
     console.error("❌ pumpService.logActivity threw error:", err);
     showNotification(
       "Error logging pump activity: check console/network.",
-      "error"
+      "error",
     );
     return { success: false, error: err?.message || String(err) };
   }
@@ -1659,7 +1698,7 @@ async function checkAndActivatePump(pH) {
       appState.user.uid,
       "basic",
       "Potassium Bicarbonate",
-      "1%"
+      "1%",
     );
   } else if (pH > appState.optimalPHMax) {
     // Activate acidic pump
@@ -1667,7 +1706,7 @@ async function checkAndActivatePump(pH) {
       appState.user.uid,
       "acidic",
       "Fulvic + Citric acid",
-      "1%"
+      "1%",
     );
   }
 }
@@ -1684,7 +1723,7 @@ async function connectArduino() {
   if (!("serial" in navigator)) {
     showNotification(
       "Web Serial API not supported. Use Chrome, Edge, or Opera.",
-      "error"
+      "error",
     );
     return;
   }
@@ -1737,7 +1776,7 @@ async function connectArduino() {
               const pH = parseFloat(obj.pH);
               if (!isNaN(pH)) {
                 console.log(
-                  `🔌 Arduino sent pH: ${pH} (${new Date().toLocaleTimeString()})`
+                  `🔌 Arduino sent pH: ${pH} (${new Date().toLocaleTimeString()})`,
                 );
                 addPHReading(pH);
               }
@@ -1903,9 +1942,8 @@ function setupEventListeners() {
       console.log("🌾 Found crop in database:", selectedCrop.label);
 
       // Show confirmation modal
-      const confirmed = await cropCardsComponent.showConfirmationModal(
-        selectedCrop
-      );
+      const confirmed =
+        await cropCardsComponent.showConfirmationModal(selectedCrop);
 
       if (confirmed) {
         console.log("✅ User confirmed crop change:", selectedCrop.label);
@@ -1920,7 +1958,7 @@ function setupEventListeners() {
         if (result.success) {
           console.log(
             "✅ Crop saved successfully to Firebase:",
-            selectedCrop.value
+            selectedCrop.value,
           );
           appState.currentCrop = selectedCrop;
           appState.optimalPHMin = selectedCrop.minPH;
@@ -2044,16 +2082,16 @@ function phStatus() {
     const oldest = appState.phReadings[0];
     console.log(
       `  Latest pH: ${latest.value} @ ${new Date(
-        latest.timestamp
-      ).toLocaleTimeString()}`
+        latest.timestamp,
+      ).toLocaleTimeString()}`,
     );
     console.log(
       `  Oldest pH: ${oldest.value} @ ${new Date(
-        oldest.timestamp
-      ).toLocaleTimeString()}`
+        oldest.timestamp,
+      ).toLocaleTimeString()}`,
     );
     console.log(
-      `  Span: ${Math.round((latest.timestamp - oldest.timestamp) / 1000)}s`
+      `  Span: ${Math.round((latest.timestamp - oldest.timestamp) / 1000)}s`,
     );
   }
 
@@ -2065,7 +2103,7 @@ function phStatus() {
       simulationState.lastRealDataTime
         ? new Date(simulationState.lastRealDataTime).toLocaleTimeString()
         : "NEVER"
-    }`
+    }`,
   );
   console.log(
     `  Time Since Real Data: ${
@@ -2073,7 +2111,7 @@ function phStatus() {
         ? Math.round((Date.now() - simulationState.lastRealDataTime) / 1000) +
           "s"
         : "N/A"
-    }`
+    }`,
   );
 
   console.log("\n📱 UI DISPLAY:");
@@ -2104,14 +2142,14 @@ function dbDiagnostic() {
 
   console.log("\n📊 pH READINGS STATE:");
   console.log(
-    `  appState.phReadings length: ${appState.phReadings?.length || 0}`
+    `  appState.phReadings length: ${appState.phReadings?.length || 0}`,
   );
   if (appState.phReadings && appState.phReadings.length > 0) {
     const latest = appState.phReadings[appState.phReadings.length - 1];
     console.log(
       `  Latest pH: ${latest.value} @ ${new Date(
-        latest.timestamp
-      ).toLocaleTimeString()}`
+        latest.timestamp,
+      ).toLocaleTimeString()}`,
     );
   }
 
@@ -2121,8 +2159,8 @@ function dbDiagnostic() {
     const latest = appState.pumpLogs[appState.pumpLogs.length - 1];
     console.log(
       `  Latest: ${latest.type} @ ${new Date(
-        latest.timestamp
-      ).toLocaleTimeString()}`
+        latest.timestamp,
+      ).toLocaleTimeString()}`,
     );
   }
 
@@ -2168,7 +2206,7 @@ async function testWrite() {
   // Test 3: Verify reads
   console.log("\n━━━ TEST 3: Verify Reads ━━━");
   console.log(
-    `pH readings in state: ${appState.phReadings?.length || 0} entries`
+    `pH readings in state: ${appState.phReadings?.length || 0} entries`,
   );
   console.log(`Pump logs in state: ${appState.pumpLogs?.length || 0} entries`);
 
@@ -2176,8 +2214,8 @@ async function testWrite() {
     const latest = appState.pumpLogs[appState.pumpLogs.length - 1];
     console.log(
       `Latest pump log: ${latest.type} @ ${new Date(
-        latest.timestamp
-      ).toLocaleTimeString()}`
+        latest.timestamp,
+      ).toLocaleTimeString()}`,
     );
   }
 
